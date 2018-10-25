@@ -1,5 +1,6 @@
 const express = require('express');
 var request = require('request');
+var childProcess = require('child_process');
 var router = express.Router();
 
 var my_client_id = "c59420679278498bbd4186dd101f3f04";
@@ -7,8 +8,8 @@ var my_client_secret = "59803c9ee3eb43858252938d3d945713";
 var redirect_uri = "http://localhost:8080/success";
 var access_token;
 
-router.route('/login').get((req, res) => {
-	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read';
+router.route('/login/').get((req, res) => {
+	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read playlist-read-private streaming';
 	return res.send({
 		redirect: 'https://accounts.spotify.com/authorize' +
 			'?response_type=code' +
@@ -19,7 +20,7 @@ router.route('/login').get((req, res) => {
 	});
 });
 
-router.route('/authorize').post((req, res) => {
+router.route('/authorize/').post((req, res) => {
 	var code = req.body.code;
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
@@ -49,7 +50,7 @@ router.route('/authorize').post((req, res) => {
 
 			// use the access token to access the Spotify Web API
 			request.get(options, function (error, response, body) {
-				console.log(body);
+				//console.log(body);
 				res.send({
 					birthday: body.birthdate,
 					name: body.display_name,
@@ -63,7 +64,21 @@ router.route('/authorize').post((req, res) => {
 	});
 });
 
-router.route('/currently_playing').get((req, res) => {
+router.route('/authToken/').get((req, res) => {
+	return res.send({
+		token: access_token
+	})
+});
+
+router.route('/player/').get((req, res) => {
+	childProcess.exec('open -a "Google Chrome" /Users/Chris/Desktop/test.html', () => {
+		return res.send({
+			message: 'child process created'
+		});
+	});
+})
+
+router.route('/currently_playing/').get((req, res) => {
 	var options = {
 		url: "https://api.spotify.com/v1/me/player/currently-playing",
 		headers: {
@@ -73,24 +88,24 @@ router.route('/currently_playing').get((req, res) => {
 	};
 	request.get(options, (error, response, body) => {
 		if (!error && response.statusCode === 200) {
-			console.log(body);
+			//console.log(body);
 			res.send({
 				is_playing: body.is_playing,
 				item: body.item
 			});
 		} else if (!error && response.statusCode === 204) {
-			console.log("User not playing anything");
+			//console.log("User not playing anything");
 			res.send({
 				is_playing: false,
 				item: null
 			});
 		} else {
-			console.log("error getting currently playing track");
+			//console.log("error getting currently playing track");
 		}
 	});
 });
 
-router.route('/top_artists').get((req, res) => {
+router.route('/top_artists/').get((req, res) => {
 	var options = {
 		url: "https://api.spotify.com/v1/me/top/artists",
 		headers: {
@@ -100,12 +115,12 @@ router.route('/top_artists').get((req, res) => {
 	};
 	request.get(options, (error, response, body) => {
 		if (!error && response.statusCode === 200) {
-			console.log(body);
+			//console.log(body);
 			res.send({
-				artists: response.body.items
+				artists: body.items
 			})
 		} else {
-			console.log("error getting top artists");
+			//console.log("error getting top artists");
 		}
 	})
 })
