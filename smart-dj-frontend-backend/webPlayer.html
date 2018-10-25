@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kinect Spotify Player</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const api = axios.create({
+        baseURL: 'https://smartdjbackend.localtunnel.me/spotifyApi/'
+      });
+      var token;
+      api.get("authToken/").then((response) => {
+        token = response.data.token;
+      }).catch((error) => {
+        console.log(error);
+      });
+      const player = new Spotify.Player({
+        name: 'SmartDJ',
+        getOAuthToken: cb => {
+          cb(token);
+        }
+      });
+
+      // Error handling
+      player.addListener('initialization_error', ({
+        message
+      }) => {
+        console.error(message);
+      });
+      player.addListener('authentication_error', ({
+        message
+      }) => {
+        console.error(message);
+      });
+      player.addListener('account_error', ({
+        message
+      }) => {
+        console.error(message);
+      });
+      player.addListener('playback_error', ({
+        message
+      }) => {
+        console.error(message);
+      });
+
+      // Playback status updates
+      player.addListener('player_state_changed', state => {
+        console.log(state);
+      });
+
+      // Ready
+      player.addListener('ready', ({
+        device_id
+      }) => {
+        console.log('Ready with Device ID', device_id);
+      });
+
+      // Not Ready
+      player.addListener('not_ready', ({
+        device_id
+      }) => {
+        console.log('Device ID has gone offline', device_id);
+      });
+
+      // Connect to the player!
+      player.connect();
+    }
+  </script>
+  <style>
+    body,
+    h1 {
+      font-family: "Raleway", sans-serif
+    }
+
+    body,
+    html {
+      height: 100%
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Spotify Player</h1>
+  <h2>Start playback from anywhere else</h2>
+</body>
+
+</html>

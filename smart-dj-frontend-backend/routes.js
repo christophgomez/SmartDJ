@@ -5,11 +5,11 @@ var router = express.Router();
 
 var my_client_id = "c59420679278498bbd4186dd101f3f04";
 var my_client_secret = "59803c9ee3eb43858252938d3d945713";
-var redirect_uri = "http://localhost:8080/success";
+var redirect_uri = "https://smartdj.localtunnel.me/success";
 var access_token;
 
 router.route('/login/').get((req, res) => {
-	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read playlist-read-private streaming';
+	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read playlist-read-private streaming user-read-recently-played';
 	return res.send({
 		redirect: 'https://accounts.spotify.com/authorize' +
 			'?response_type=code' +
@@ -71,7 +71,7 @@ router.route('/authToken/').get((req, res) => {
 });
 
 router.route('/player/').get((req, res) => {
-	childProcess.exec('open -a "Google Chrome" /Users/Chris/Desktop/test.html', () => {
+	childProcess.exec('open -a "Google Chrome" ./webPlayer.html', () => {
 		return res.send({
 			message: 'child process created'
 		});
