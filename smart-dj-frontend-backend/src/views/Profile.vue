@@ -7,7 +7,7 @@
 		<div v-if='curr_playing===true'>
 			<h3>Currently Listening To: </h3>
 			<b>{{artist}}</b><br>
-			<b>{{album}} | {{track}}</b>
+			<b>{{track}}</b>
 		</div>
 		<div v-if='top_artists ===true'>
 			<h3>Top 20 Artists: </h3>
@@ -19,8 +19,9 @@
 		<a href='' target="_blank" rel="noopener">{{email}}</a><br>
 		<a :href='url' target="_blank" rel="noopener">{{url}}</a><br>
 		<ul>
-			<li class='button'><a href='' @click.prevent='currentlyPlaying'>Get Currently Playing Track</a></li>
-			<li class='button'><a href='' @click.prevent='topArtists'>Get Top Artists</a></li>
+			<li class='button'><button @click='currentlyPlaying'>Get Currently Playing Track</button></li>
+			<li class='button'><button @click='topArtists'>Get Top Artists</button></li>
+			<li class='button'><button @click='player'>Start Web Player</button></li>
 		</ul>
 	</div>
 </template>
@@ -60,10 +61,11 @@ export default {
 			this.curr_playing = true;
 			if(response.data.is_playing === false) {
 				this.artist = 'User is not playing anything right now';
+				this.track = '';
 			} else {
 				this.artist = response.data.item.album.artists[0].name;
 				this.album = response.data.item.album.name;
-				this.track = response.data.item.name;
+				this.track = this.album + " | "+ response.data.item.name;
 			}
 		},
 		async topArtists() {
@@ -78,6 +80,10 @@ export default {
 					this.artists.push(response.data.artists[i].name);
 				}
 			}
+		},
+		async player() {
+			const response = await SpotifyService.startPlayer();
+			console.log(response.data.message);
 		}
 	}
 }
@@ -91,6 +97,19 @@ ul {
 .button {
   display: inline-block;
   margin: 0 10px;
+}
+button {
+   background:none!important;
+     border:none; 
+     padding:0!important;
+     font: inherit;
+     color: #42b983;
+     /*border is optional*/
+     border-bottom:1px solid #42b983; 
+     cursor: pointer;
+}
+button:focus {
+  outline: 0;
 }
 a {
   color: #42b983;
