@@ -3,7 +3,7 @@
     <h1>Login {{this.$data.type}}</h1>
     <h2>This is the auth code: </h2><small><p>{{this.$route.query.code}}</p></small>
     <h3>Send it back to the server to exchange it for an auth key to start making requests</h3>
-    <button  @click='exchange'>Send</button>
+    <button @click='exchange'>Send</button>
     <p>(Note: In production, this page is completely bypassed and the user is simply redirected to their profile page. This is simply for debugging)</p>
   </div>
 </template>

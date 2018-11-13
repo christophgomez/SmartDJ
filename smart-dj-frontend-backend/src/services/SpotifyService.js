@@ -5,7 +5,7 @@ export default {
 		return Api().get('login/');
 	},
 	exchange(params) {
-		return Api().post('authorize/',params);
+		return Api().post('authorize/', params);
 	},
 	getCurrentlyPlaying() {
 		return Api().get('currently_playing/');

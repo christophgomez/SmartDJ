@@ -9,7 +9,7 @@ var redirect_uri = "https://smartdj.localtunnel.me/success";
 var access_token;
 
 router.route('/login/').get((req, res) => {
-	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read playlist-read-private streaming user-read-recently-played';
+	var scopes = 'user-read-private user-read-email user-read-playback-state user-read-birthdate user-read-currently-playing user-read-playback-state user-top-read playlist-read-private streaming user-read-recently-played user-library-modify';
 	return res.send({
 		redirect: 'https://accounts.spotify.com/authorize' +
 			'?response_type=code' +
@@ -22,6 +22,7 @@ router.route('/login/').get((req, res) => {
 
 router.route('/authorize/').post((req, res) => {
 	var code = req.body.code;
+
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
 		form: {
@@ -34,6 +35,7 @@ router.route('/authorize/').post((req, res) => {
 		},
 		json: true
 	};
+	
 	request.post(authOptions, function (error, response, body) {
 		if (!error && response.statusCode === 200) {
 
