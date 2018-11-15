@@ -18,17 +18,23 @@
 		<br>
 		<a href='' target="_blank" rel="noopener">{{email}}</a><br>
 		<a :href='url' target="_blank" rel="noopener">{{url}}</a><br>
-		<ul>
+		<ul style='margin-top:20px'>
 			<li class='button'><button @click='currentlyPlaying'>Get Currently Playing Track</button></li>
 			<li class='button'><button @click='topArtists'>Get Top Artists</button></li>
 			<li class='button'><button @click='player'>Start Web Player</button></li>
+			<br><br>
+			<li class='button'><button @click='prev'>Previous Track</button></li>
+			<li class='button'><button @click='next'>Next Track</button></li>
 		</ul>
+		<md-button class="md-raised md-primary" @click='logout()'>Log Out</md-button>
 	</div>
 </template>
 
 <script>
  /* eslint-disable */
 import SpotifyService from '@/services/SpotifyService';
+import UserService from '@/services/UserService'
+
 export default {
 	name: 'Profile',
 	data() {
@@ -47,26 +53,28 @@ export default {
 			type: ''
 		}
 	},
-	created() {
-		this.getProfile();
-	},
-	mounted() {
-		var tmp = this.type.charAt(0).toUpperCase() + this.type.slice(1);
-		this.type = tmp;
+	beforeRouteEnter(to, from, next) {
+		next(vm => {
+			if(localStorage.username) {
+				vm.refreshToken();
+				vm.getProfile();
+				next();
+			} else {
+				next('/signin');
+			}
+		});
 	},
 	methods: {
 		async getProfile() {
 			const response = await SpotifyService.getProfile();
-			if(response.status === 200) {
-				this.name = response.body.name;
-				this.birthday = response.body.birthday;
-				this.email = response.body.email;
-				this.url = response.body.url;
-				this.followers = response.body.followers;
-				this.type = response.body.type;
-			} else {
-				console.log("Errror: "+response.error);
-			}
+			this.name = response.data.name;
+			this.birthday = response.data.birthday;
+			this.email = response.data.email;
+			this.url = response.data.url;
+			this.followers = response.data.followers;
+			this.type = response.data.type;
+			this.type = this.type.charAt(0).toUpperCase() + this.type.slice(1);
+			console.log('get Profile ran');
 		},
 		async currentlyPlaying() {
 			const response = await SpotifyService.getCurrentlyPlaying();
@@ -96,10 +104,27 @@ export default {
 				}
 			}
 		},
+		async next() {
+			await SpotifyService.nextTrack();
+		},
+		async prev() {
+			await SpotifyService.previousTrack();
+		},
 		async player() {
 			const response = await SpotifyService.startPlayer();
-			console.log(response.data.message);
-		}
+			//console.log(response.data.message);
+		},
+		logout() {
+			localStorage.removeItem('username');
+			this.$router.push({name: 'signin'});
+		},
+		async refreshToken() {
+			const userResponse = await UserService.getUser(localStorage.username);
+      const spotifyResponse = await SpotifyService.refreshAccessToken({
+        access_token: userResponse.data.user.access_token,
+        refresh_token: userResponse.data.user.refresh_token
+      });
+    }
 	}
 }
 </script>
@@ -128,6 +153,5 @@ button:focus {
 }
 a {
   color: #42b983;
-	margin-top:20px;
 }
 </style>

@@ -41,7 +41,11 @@ export default {
     async login() {
       const response = await SpotifyService.login();
       location.href = (response.data.redirect);
-    }
+    },
+    async player() {
+			const response = await SpotifyService.startPlayer();
+			//console.log(response.data.message);
+		},
   }
 }
 </script>
@@ -76,7 +80,7 @@ button:focus {
 }
 li {
   display: inline-block;
-  margin: 0 10px;
+  margin: 20px 10px;
 }
 a {
   color: #42b983;

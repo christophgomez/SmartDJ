@@ -10,13 +10,6 @@
 </template>
 
 <style lang='scss'>
-@import "~vue-material/dist/theme/engine"; // Import the theme engine
-
-@include md-register-theme("default", (
-  primary: #42b983,
-  accent: #FFC2AB,
-));
-@import "~vue-material/dist/theme/all"; // Apply the theme
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

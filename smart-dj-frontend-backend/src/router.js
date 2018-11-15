@@ -19,13 +19,13 @@ export default new Router({
       component: () => import('./views/AuthPage.vue')
     },
     {
-      path: '/profile',
-      name: 'profile',
+      path: '/account',
+      name: 'account',
       component: () => import('./views/SpotifyProfile.vue'),
     },
     {
-      path: '/account',
-      name: 'account',
+      path: '/signin',
+      name: 'signin',
       component: () => import('./views/AccountSignIn.vue'),
       children: [
         {

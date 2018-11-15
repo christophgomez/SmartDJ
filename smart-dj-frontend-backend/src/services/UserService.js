@@ -6,5 +6,11 @@ export default {
 	},
 	createUser(params) {
 		return Api().post('/add', params);
+	},
+	deleteUser(id) {
+		return Api().delete(`/delete/${id}`)
+	},
+	getUser(username) {
+		return Api().get(`/${username}`);
 	}
 }
