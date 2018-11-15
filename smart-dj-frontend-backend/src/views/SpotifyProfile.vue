@@ -9,7 +9,7 @@
 			<b>{{artist}}</b><br>
 			<b>{{track}}</b>
 		</div>
-		<div v-if='top_artists ===true'>
+		<div v-if='top_artists===true'>
 			<h3>Top 20 Artists: </h3>
 			<ul v-for='(artist) in artists' :key='artist'>
 				<li>{{artist}}</li>
@@ -27,6 +27,7 @@
 </template>
 
 <script>
+ /* eslint-disable */
 import SpotifyService from '@/services/SpotifyService';
 export default {
 	name: 'Profile',
@@ -37,22 +38,36 @@ export default {
 			track: '',
 			album: '',
 			top_artists: false,
-			artists: []
+			artists: [],
+			name: '',
+			birthday: '',
+			email: '',
+			url: '',
+			followers: '',
+			type: ''
 		}
 	},
-	props: {
-		name: String,
-		birthday: String,
-		email: String,
-		url: String,
-		followers: Number,
-		type: String
+	created() {
+		this.getProfile();
 	},
 	mounted() {
 		var tmp = this.type.charAt(0).toUpperCase() + this.type.slice(1);
 		this.type = tmp;
 	},
 	methods: {
+		async getProfile() {
+			const response = await SpotifyService.getProfile();
+			if(response.status === 200) {
+				this.name = response.body.name;
+				this.birthday = response.body.birthday;
+				this.email = response.body.email;
+				this.url = response.body.url;
+				this.followers = response.body.followers;
+				this.type = response.body.type;
+			} else {
+				console.log("Errror: "+response.error);
+			}
+		},
 		async currentlyPlaying() {
 			const response = await SpotifyService.getCurrentlyPlaying();
 			if(this.top_artists) {

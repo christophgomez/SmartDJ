@@ -11,8 +11,6 @@
     <p>
       The real magic is happening in the Node.js server
     </p>
-    <h3>Log in to Spotify</h3>
-    <ul><li><button @click='login'>Login</button></li></ul>
     <h3>Essential Links</h3>
     <ul>
       <li><a href='https://developer.spotify.com/documentation/web-api/' target="_blank" rel="noopener">Spotify Web API Docs</a></li>
