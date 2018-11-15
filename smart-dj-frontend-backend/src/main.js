@@ -3,27 +3,16 @@ import App from './App.vue'
 import router from './router'
 import Vuelidate from 'vuelidate'
 
-import {
-  MdButton,
-  MdContent,
-  MdTabs,
-  MdCard,
-  MdField,
-  MdInput,
-  MdLayout,
-  MdGutter
-} from 'vue-material/dist/components'
+import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.min.css'
 
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
+Vue.use(BootstrapVue);
 Vue.use(Vuelidate)
-Vue.use(MdButton)
-Vue.use(MdContent)
-Vue.use(MdTabs)
-Vue.use(MdCard)
-Vue.use(MdField)
-Vue.use(MdInput)
-Vue.use(MdLayout)
-Vue.use(MdGutter)
+Vue.use(VueMaterial)
 
 Vue.config.productionTip = false
 

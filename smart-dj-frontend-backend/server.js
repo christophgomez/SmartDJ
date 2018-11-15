@@ -1,3 +1,4 @@
+/* eslint-disable */
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -10,8 +11,19 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(cors());
 
-const routes = require('./routes.js');
-app.use('/spotifyApi', routes);
+// Set up MongoDB
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/users');
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'mongoose connection error'));
+db.once('open', function (callback) {
+	console.log('mongoose connection succeeded');
+});
+
+const spotifyRoutes = require('./expressRoutes/spotifyRoutes.js');
+app.use('/spotify', spotifyRoutes);
+const userRoutes = require('./expressRoutes/userRoutes.js');
+app.use('/users', userRoutes);
 
 // Set up the server to listen for connections
 const server = http.createServer(app);

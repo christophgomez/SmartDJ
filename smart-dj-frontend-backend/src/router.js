@@ -16,13 +16,31 @@ export default new Router({
     {
       path: '/success',
       name: 'success',
-      component: () => import('./views/About.vue')
+      component: () => import('./views/AuthPage.vue')
     },
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('./views/Profile.vue'),
-      props: true
+      component: () => import('./views/SpotifyProfile.vue'),
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: () => import('./views/AccountSignIn.vue'),
+      children: [
+        {
+          path: '',
+          component: () => import('./components/Signin.vue'),
+        },
+        {
+          path: 'signup',
+          component: () => import('./components/Signup.vue'),
+        }
+      ]
+    },
+    {
+      path: '/system_settings',
+      component: () => import('./views/SystemSettings.vue'),
     }
   ]
 })
