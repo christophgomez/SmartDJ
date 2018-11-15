@@ -10,11 +10,12 @@
   <script>
     window.onSpotifyWebPlaybackSDKReady = () => {
       const api = axios.create({
-        baseURL: 'https://smartdjbackend.localtunnel.me/spotifyApi/'
+        baseURL: 'http://localhost:8081/spotify/'
       });
       var token;
-      api.get("authToken/").then((response) => {
-        token = response.data.token;
+      var id;
+      api.get("access_token").then((response) => {
+        token = response.data.access_token;
       }).catch((error) => {
         console.log(error);
       });
@@ -57,6 +58,12 @@
         device_id
       }) => {
         console.log('Ready with Device ID', device_id);
+        api.post("device_play", {id: device_id}).then((response) => {
+            console.log('device_id exchanged');
+            api.put('device_play');
+          }).catch((error)=> {
+            console.log(error);
+          });
       });
 
       // Not Ready
@@ -67,7 +74,11 @@
       });
 
       // Connect to the player!
-      player.connect();
+      player.connect().then(success => {
+        if(success) {
+          console.log('Webplayback SDK successfully connected to Spotify');
+        }
+      });
     }
   </script>
   <style>

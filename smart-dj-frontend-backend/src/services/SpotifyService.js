@@ -10,6 +10,9 @@ export default {
 	checkAccessToken() {
 		return Api().get('access_token');
 	},
+	deleteAccessToken() {
+		return Api().delete('access_token');
+	},
 	getCurrentlyPlaying() {
 		return Api().get('currently_playing');
 	},
@@ -19,7 +22,16 @@ export default {
 	startPlayer() {
 		return Api().get('player');
 	},
+	nextTrack() {
+		return Api().post('next');
+	},
+	previousTrack() {
+		return Api().post('prev');
+	},
 	getProfile() {
 		return Api().get('profile');
+	},
+	refreshAccessToken(params) {
+		return Api().post('access_token', params);
 	}
 };

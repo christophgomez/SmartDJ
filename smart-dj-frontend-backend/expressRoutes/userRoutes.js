@@ -12,6 +12,7 @@ userRoute.route('/').get((req, res) => {
 				error: error
 			});
 		}
+		console.log("\n" + users + "\n");
 		return res.status(200).send({
 			users: users
 		});
@@ -27,6 +28,7 @@ userRoute.route('/:username').get((req, res) => {
 				error: error
 			});
 		}
+		console.log(user);
 		return res.status(200).send({
 			user: user
 		});
@@ -39,7 +41,9 @@ userRoute.route('/add').post((req, res) => {
 		username: req.body.username,
 		password: req.body.password,
 		access_token: req.body.access_token,
-		refresh_token: req.body.refresh_token
+		refresh_token: req.body.refresh_token,
+		email: req.body.email,
+		spotify_type: req.body.spotify_type
 	});
 	new_user.save((error) => {
 		if (error) {
@@ -81,11 +85,12 @@ userRoute.route('/delete/:id').delete((req, res) => {
 		_id: req.params.id,
 	}, (error) => {
 		if (error) {
-			console.log(error);
+			console.log('\n'+error+'\n');
 			return res.status(500).send({
 				error: error
 			});
 		}
+		console.log('\nuser deleted\n');
 		return res.status(200).send();
 	});
 });

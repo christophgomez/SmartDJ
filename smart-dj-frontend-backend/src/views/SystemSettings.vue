@@ -1,7 +1,7 @@
 <template>
 	<div class="page-container">
     <md-app>
-      <md-app-toolbar class='md-primary'>
+      <md-app-toolbar class='md-primary' style='background-color:#42b983'>
 				<div v-if='onUsers===true'>
         	<span class="md-title" style='color:white'>Users</span>
 				</div>
@@ -40,13 +40,30 @@
 
       <md-app-content>
         <div v-if='onUsers===true'>
-					<md-list>
-						<md-list-item v-for='(user, index) in users' :key='index'>
-							<span class='md-list-item-text'>{{user.username}}</span>
-						</md-list-item>
-					</md-list>
 
+					<md-table md-card>
+      			<md-table-row>
+        			<md-table-head style='text-align:center'>Username</md-table-head>
+        			<md-table-head style='text-align:center'>Email</md-table-head>
+        			<md-table-head style='text-align:center'>Spotify Type</md-table-head>
+							<md-table-head style='text-align:center'>System Role</md-table-head>
+							<md-table-head style='text-align:center'>Delete</md-table-head>
+      			</md-table-row>
+
+						<md-table-row v-for='(user, index) in users' :key='index'>
+        			<md-table-cell>{{user.username}}</md-table-cell>
+							<md-table-cell>{{user.email}}</md-table-cell>
+        			<md-table-cell>{{user.spotify_type}}</md-table-cell>
+        			<md-table-cell>System Role Here</md-table-cell>
+        			<md-table-cell>
+								<md-button @click='deleteUser(user._id)' class="md-icon-button">
+									<font-awesome-icon icon='trash'/>
+								</md-button>
+							</md-table-cell>
+      			</md-table-row>
+    			</md-table>
         </div>
+
       </md-app-content>
     </md-app>
   </div>
@@ -85,20 +102,24 @@ export default {
 		 async getUsers() {
 			 const response = await UserService.fetchUsers();
 			 if(response.status === 200) {
-				 console.log(response.body.users);
-				 this.users = response.body.users;
+				 this.users = response.data.users;
 			 } else {
 				 console.log("Error: "+response.error);
 			 }
+		 },
+		 async deleteUser(id) {
+			 await UserService.deleteUser(id);
+			 this.getUsers();
 		 }
 	}
-
 }
 </script>
 
 <style scoped>
   .md-app {
     border: 1px solid rgba(#000, .12);
+		margin-right:20px;
+		margin-left:20px;
   }
   .md-drawer {
     width: 230px;

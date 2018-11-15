@@ -27,7 +27,7 @@
       </div>
       <div class="md-layout md-gutter">
         <div class="md-layout-item md-small-size-100">
-          <md-button class="md-raised md-primary" @click='validateUser()' style='margin-top:20px;color:white'>Sign In</md-button>
+          <md-button class="md-raised" @click='validateUser()' style='margin-top:20px;background-color:#42b983;'>Sign In</md-button>
         </div>
       </div>
     </md-card-content>
