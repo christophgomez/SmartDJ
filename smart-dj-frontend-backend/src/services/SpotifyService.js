@@ -7,11 +7,11 @@ export default {
 	exchange(params) {
 		return Api().post('authorize', params);
 	},
-	checkAccessToken() {
-		return Api().get('access_token');
+	checkTempAccessToken() {
+		return Api().get('access_token/temp');
 	},
 	deleteAccessToken() {
-		return Api().delete('access_token');
+		return Api().delete('access_token/primary');
 	},
 	getCurrentlyPlaying() {
 		return Api().get('currently_playing');
@@ -28,10 +28,13 @@ export default {
 	previousTrack() {
 		return Api().post('prev');
 	},
-	getProfile() {
-		return Api().get('profile');
+	getUserProfile(token) {
+		return Api().get(`profile/${token}`);
 	},
-	refreshAccessToken(params) {
-		return Api().post('access_token', params);
+	refreshTempAccessToken(params) {
+		return Api().post('access_token/temp/refresh', params);
+	},
+	getPrimaryToken() {
+		return Api().get('access_token/primary');
 	}
 };

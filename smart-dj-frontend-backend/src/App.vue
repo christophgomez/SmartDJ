@@ -2,15 +2,38 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link>
-      <router-link to="/account">Account</router-link>
       <router-link to="/system_settings">Settings</router-link>
     </div>
     <router-view/>
   </div>
 </template>
 
-<style lang='scss'>
+<script>
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
+import 'vue-material/dist/vue-material.min.css'
 
+export default {
+  name: 'App',
+  data: function() {
+    return {
+      username: '',
+    }
+  },
+  created() {
+    console.log(this.$route);
+  },
+  watch: {
+    $route (to, from){
+        if(localStorage.username) {
+          this.username = localStorage.username;
+        }
+    }
+  } 
+}
+</script>
+
+<style>
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -26,10 +49,6 @@
   font-weight: bold;
   color: #2c3e50;
   margin: 30px;
-}
-
-button {
-  color: white;
 }
 
 #nav a.router-link-exact-active {

@@ -19,7 +19,7 @@ export default new Router({
       component: () => import('./views/AuthPage.vue')
     },
     {
-      path: '/account',
+      path: '/account/:username',
       name: 'account',
       component: () => import('./views/SpotifyProfile.vue'),
     },
@@ -27,20 +27,14 @@ export default new Router({
       path: '/signin',
       name: 'signin',
       component: () => import('./views/AccountSignIn.vue'),
-      children: [
-        {
-          path: '',
-          component: () => import('./components/Signin.vue'),
-        },
-        {
-          path: 'signup',
-          component: () => import('./components/Signup.vue'),
-        }
-      ]
     },
     {
       path: '/system_settings',
       component: () => import('./views/SystemSettings.vue'),
+    },
+    {
+      path: '*',
+      redirect: '/'
     }
   ]
 })
