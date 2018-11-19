@@ -2,26 +2,25 @@
 	<div class="page-container">
     <md-app>
       <md-app-toolbar class='md-primary' style='background-color:#42b983'>
-				<div v-if='onUsers===true'>
-        	<span class="md-title" style='color:white'>Users</span>
-				</div>
-				<div v-if='onOtherSettings===true'>
-        	<span class="md-title" style='color:white'>Other Settings</span>
-				</div>
+        <span class="md-title" style='color:white'>{{title}}</span>
       </md-app-toolbar>
 
       <md-app-drawer md-permanent="full">
         <md-toolbar class="md-transparent" md-elevation="0">
-          Navigation
+          Settings
         </md-toolbar>
 
         <md-list>
           <md-list-item>
-            <a href=# class="md-list-item-text" @click.prevent="setActive('users')">Users</a>
+            <b-button :variant="'link'" class="md-list-item-text" @click="setActive('spotify')">Spotify</b-button>
           </md-list-item>
 
 					<md-list-item>
-						<a href='#' class='md-list-item-text' @click.prevent="setActive('other')">Other Settings</a>
+						<b-button :variant="'link'" class='md-list-item-text' @click="setActive('users')">Users</b-button>
+					</md-list-item>
+
+					<md-list-item>
+						<b-button :variant="'link'" class='md-list-item-text' @click="setActive('other')">Other Settings</b-button>
 					</md-list-item>
 
           <!--<md-list-item>
@@ -39,23 +38,73 @@
       </md-app-drawer>
 
       <md-app-content>
+
+				<div v-if='onSpotify===true'>
+					<md-list>
+
+						<md-list-item>
+							<b-container>
+								<b-row>
+									<b-col cols='6'>
+										<h2 class='md-title'>Primary Spotify Account</h2>
+										<div class='md-subhead' style='overflow-wrap:break-word'>This is the account that will be used for music streaming</div>
+									</b-col>
+									<b-col>
+										<div v-if='tokenExists===true'>
+											<md-card>
+      									<md-card-header>
+        									<md-card-header-text>
+          									<div class="md-title">{{primary_user}}</div>
+          									<div class="md-subhead">{{primary_type}}</div>
+        									</md-card-header-text>
+
+        									<md-card-media>
+          									<img src="@/assets/spotifyLogo.png" alt="Spotify">
+        									</md-card-media>
+      									</md-card-header>
+
+      									<md-card-actions>
+        									<md-button @click='deleteToken()'>Unlink</md-button>
+        									<md-button>Change Accounts</md-button>
+      									</md-card-actions>
+    									</md-card>
+										</div>
+										<div v-if='tokenExists===false'>
+											<md-card>
+      									<md-card-header>
+        									<md-card-header-text>
+          									<div class="md-title">No Primary Account</div>
+          									<div class="md-subhead">Select or link a new account</div>
+        									</md-card-header-text>
+
+        									<md-card-media>
+          									<img src="@/assets/spotifyLogo.png" alt="Spotify">
+        									</md-card-media>
+      									</md-card-header>
+
+      									<md-card-actions>
+        									<md-button @click='deleteToken()'>Link Account</md-button>
+        									<md-button v-b-modal.account-select>Select Account</md-button>
+      									</md-card-actions>
+    									</md-card>
+										</div>
+									</b-col>
+								</b-row>
+							</b-container>
+						</md-list-item>
+
+					</md-list>
+				</div>
+
         <div v-if='onUsers===true'>
 
-					<md-table md-card>
-      			<md-table-row>
-        			<md-table-head style='text-align:center'>Username</md-table-head>
-        			<md-table-head style='text-align:center'>Email</md-table-head>
-        			<md-table-head style='text-align:center'>Spotify Type</md-table-head>
-							<md-table-head style='text-align:center'>System Role</md-table-head>
-							<md-table-head style='text-align:center'>Delete</md-table-head>
-      			</md-table-row>
-
-						<md-table-row v-for='(user, index) in users' :key='index'>
-        			<md-table-cell>{{user.username}}</md-table-cell>
-							<md-table-cell>{{user.email}}</md-table-cell>
-        			<md-table-cell>{{user.spotify_type}}</md-table-cell>
-        			<md-table-cell>System Role Here</md-table-cell>
-        			<md-table-cell>
+					<md-table v-model="users" md-card md-sort="username" md-sort-order="asc" md-fixed-header>
+						<md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single" @click='goToUser(item.username)'>
+        			<md-table-cell md-label="Username" md-sort-by="username">{{item.username}}</md-table-cell>
+							<md-table-cell md-label="Email" md-sort-by="email">{{item.email}}</md-table-cell>
+        			<md-table-cell md-label="Spotify Type" md-sort-by="spotify_type">{{item.spotify_type}}</md-table-cell>
+        			<md-table-cell md-label="System Role">System Role Here</md-table-cell>
+        			<md-table-cell md-label="Delete">
 								<md-button @click='deleteUser(user._id)' class="md-icon-button">
 									<font-awesome-icon icon='trash'/>
 								</md-button>
@@ -66,6 +115,9 @@
 
       </md-app-content>
     </md-app>
+		<b-modal id='account-select' centered title='Select an Account'>
+			<p>Vertically centered modal</p>
+		</b-modal>
   </div>
 </template>
 
@@ -75,29 +127,57 @@ import SpotifyService from '@/services/SpotifyService';
 
 export default {
 	name: 'SystemSettings',
-	data: () => ({
-		onUsers: true,
-		onOtherSettings: false,
-		users: [],
-	}),
+	data() {
+		return {
+			onUsers: false,
+			onOtherSettings: false,
+			onSpotify: true,
+			title: 'Spotify',
+			users: [],
+			access_token: '',
+			primary_user: '',
+			primary_type: '',
+			tokenExists: false,
+		}
+	},
+	beforeRouteEnter(to, from, next) {
+		next(vm => {
+			if(localStorage.jwtToken) {
+				next();
+			} else {
+				next('/signin');
+			}
+		});
+	},
 	created() {
 		this.getUsers();
+		this.getPrimaryAccount();
 	},
 	methods: {
-		 getActiveClass(fieldName) {
-
-		 },
 		 setActive(fieldName) {
 			 switch(fieldName) {
+				 case 'spotify':
+				 	this.onSpotify = true;
+					this.onUsers = false;
+					this.onOtherSettings = false;
+					this.title = 'Spotify';
+					break;
 				 case 'users':
+				 	this.onSpotify = false;
 					this.onUsers = true;
 					this.onOtherSettings = false;
+					this.title = 'Users';
 					break;
 				case 'other':
+					this.onSpotify = false;
 					this.onUsers = false;
 					this.onOtherSettings = true;
+					this.title = 'Other Settings'
 					break;
 			 }
+		 },
+		 goToUser(username) {
+			 this.$router.push({name: 'account', params: {username: username}});
 		 },
 		 async getUsers() {
 			 const response = await UserService.fetchUsers();
@@ -107,9 +187,27 @@ export default {
 				 console.log("Error: "+response.error);
 			 }
 		 },
+		 async deleteToken() {
+			 await SpotifyService.deleteAccessToken();
+			 this.tokenExists = false;
+		 },
 		 async deleteUser(id) {
 			 await UserService.deleteUser(id);
 			 this.getUsers();
+		 },
+		 async getPrimaryAccount() {
+			 const response = await SpotifyService.getPrimaryToken();
+			 if(response.data.success === true) {
+				 this.access_token = response.data.access_token;
+				 const profileResponse = await SpotifyService.getUserProfile(this.access_token);
+				 this.primary_user = profileResponse.data.name;
+				 this.primary_type = profileResponse.data.type;
+				 this.primary_type = this.primary_type.charAt(0).toUpperCase() + this.primary_type.slice(1);
+				 this.tokenExists = true;
+			 } else {
+				 this.tokenExists = false;
+				 console.log('Could not get primary token');
+			 }
 		 }
 	}
 }
@@ -124,5 +222,19 @@ export default {
   .md-drawer {
     width: 230px;
     max-width: calc(100vw - 125px);
+  }
+	.btn{
+		color: #42b983;
+	}
+	.md-label {
+		text-align:center;
+	}
+	.md-table-row:hover .md-table-cell {
+		background-color: #bdf3db
+	}
+	.md-card {
+    width: 350px;
+    margin: 10px;
+		float:right;
   }
 </style>

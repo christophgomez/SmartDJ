@@ -12,6 +12,7 @@
       The real magic is happening in the Node.js server
     </p>
     <h3>Essential Links</h3>
+    <a href='#' @click.prevent='logout'>Logout</a>
     <ul>
       <li><a href='https://developer.spotify.com/documentation/web-api/' target="_blank" rel="noopener">Spotify Web API Docs</a></li>
       <li><a href='https://developer.spotify.com/documentation/web-playback-sdk/quick-start/' target='_blank' rel="nooponer">Spotify Web Playback SDK</a></li>
@@ -42,10 +43,10 @@ export default {
       const response = await SpotifyService.login();
       location.href = (response.data.redirect);
     },
-    async player() {
-			const response = await SpotifyService.startPlayer();
-			//console.log(response.data.message);
-		},
+    logout() {
+      localStorage.removeItem('jwtToken');
+      localStorage.removeItem('username');
+    }
   }
 }
 </script>

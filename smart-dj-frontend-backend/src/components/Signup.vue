@@ -1,5 +1,5 @@
 <template>
-	<md-card class="md-size-50 md-small-size-100 md-layout-item">
+	<md-card class="md-size-50 md-small-size-100">
 		<md-card-header>
 			<div class="md-title">Create an Account</div>
 		</md-card-header>
@@ -22,11 +22,11 @@
         <md-input type="password" name="repeatPassword" v-model.lazy="$v.form.repeatPassword.$model" :disabled="sending"/>
         <span class="md-error" v-if="!$v.form.repeatPassword.sameAsPassword">Passwords do not match!</span>
       </md-field>
-      <md-button @click='openWindow()' class="md-raised" style='background-color:#42b983;'>Link Spotify Account</md-button>
+      <md-button @click='openWindow()' class="md-raised">Link Spotify Account</md-button>
       <span class="md-error" v-if="spotify===false"><br><br>There was an error linking your spotify account</span>
       <div class="md-layout md-gutter">
         <div class="md-layout-item md-small-size-100">
-          <md-button class="md-raised" @click='validateUser' style='margin-top:20px;background-color:#42b983;'>Submit</md-button>
+          <md-button class="md-raised" @click='validateUser' style='margin-top:20px'>Submit</md-button>
         </div>
       </div>
     </md-card-content>
@@ -42,19 +42,21 @@ import UserService from '@/services/UserService';
 export default {
   name: "SignUp",
   components: {},
-  data: () => ({
-    form: {
-      password: '',
-      userName: '',
-      repeatPassword: ''
-    },
-    access_token: '',
-    refresh_token: '',
-    userSaved: false,
-    sending: false,
-    lastUser: null,
-    spotify: true,
-  }),
+  data() {
+    return { 
+      form: {
+        password: '',
+        userName: '',
+        repeatPassword: ''
+      },
+      access_token: '',
+      refresh_token: '',
+      userSaved: false,
+      sending: false,
+      lastUser: null,
+      spotify: true,
+    }
+  },
   validations: {
     form: {
       password: {
@@ -71,7 +73,7 @@ export default {
     }
   },
   created() {
-    this.clearAccessToken();
+    // this.clearAccessToken();
   },
   methods: {
     getValidationClass(fieldName) {
@@ -95,8 +97,8 @@ export default {
     async saveUser() {
       this.sending = true;
       // Instead of this timeout, here you can call your API
-      const response = await SpotifyService.checkAccessToken();
-      if(response.data.token === true) {
+      const response = await SpotifyService.checkTempAccessToken();
+      if(response.data.success === true) {
         this.spotify = true;
         this.access_token = response.data.access_token;
         this.refresh_token = response.data.refresh_token;
@@ -107,7 +109,8 @@ export default {
       }
       this.sending = true;
       //console.log(this.$v.form.userName.$model);
-      const spotifyResponse = await SpotifyService.getProfile();
+      console.log(response.data.access_token);
+      const spotifyResponse = await SpotifyService.getUserProfile(response.data.access_token);
       const response2 = await UserService.createUser({
         username: this.$v.form.userName.$model,
         password: this.$v.form.password.$model,
@@ -116,16 +119,18 @@ export default {
         email: spotifyResponse.data.email,
         spotify_type: spotifyResponse.data.type
       });
-      if(response2.status === 200) {
+      if(response2.data.success === true) {
+        console.log('user saved')
         this.userSaved = true;
+        localStorage.setItem('jwtToken', response.data.token);
+        console.log('username: '+this.$v.form.userName.$model);
         localStorage.setItem('username', this.$v.form.userName.$model);
         this.player();
-        this.$router.push({ name: 'account'});
+        this.$router.go(-1);
       } else {
-        window.setTimeout(() => {
-          this.sending = false;
-          this.clearForm();
-        }, 1000);
+        alert(response2.data.msg);
+        this.sending = false;
+        this.clearForm();
       }
     },
     validateUser() {
@@ -147,12 +152,15 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .md-card {
   z-index:1;
-  margin-right:10px;
 }
 .md-card-content {
   padding: 50px;
+}
+.md-button {
+  background-color:#42b983;
+  color:white;
 }
 </style>

@@ -12,5 +12,11 @@ export default {
 	},
 	getUser(username) {
 		return Api().get(`/${username}`);
+	},
+	loginUser(params) {
+		return Api().post('/login', params);
+	},
+	updateToken(username, params) {
+		return Api().put(`/updateToken/${username}`, params);
 	}
 }

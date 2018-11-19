@@ -10,16 +10,17 @@
   <script>
     window.onSpotifyWebPlaybackSDKReady = () => {
       const api = axios.create({
-        baseURL: 'http://localhost:8081/spotify/'
+        baseURL: 'http://chrisbook.local:8081/spotify/'
       });
       var token;
       var id;
-      api.get("access_token").then((response) => {
+      api.get("access_token/primary").then((response) => {
         token = response.data.access_token;
+        console.log('primary token: '+token);
       }).catch((error) => {
         console.log(error);
       });
-      const player = new Spotify.Player({
+      const player = new Spotify.Player({ 
         name: 'SmartDJ',
         getOAuthToken: cb => {
           cb(token);

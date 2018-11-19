@@ -14,17 +14,21 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faTrash)
+import VueWait from 'vue-wait'
+Vue.use(VueWait)
 
-Vue.component('font-awesome-icon', FontAwesomeIcon)
+library.add(faTrash);
+
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.use(BootstrapVue);
-Vue.use(Vuelidate)
-Vue.use(VueMaterial)
+Vue.use(Vuelidate);
+Vue.use(VueMaterial);
 
 Vue.config.productionTip = false
 
 new Vue({
   router,
+  wait: new VueWait(),
   render: h => h(App)
 }).$mount('#app')
