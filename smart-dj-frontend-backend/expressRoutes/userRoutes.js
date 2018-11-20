@@ -12,11 +12,12 @@ userRoute.route('/').get((req, res) => {
 	User.find({}, (error, users) => {
 		if (error) {
 			console.log(error);
-			return res.status(500).send({
-				error: error
+			return res.send({
+				success: false
 			});
 		}
 		return res.status(200).send({
+			success: true,
 			users: users
 		});
 	}).sort({ _id: -1 });
@@ -28,11 +29,12 @@ userRoute.route('/:username').get((req, res) => {
 	User.findOne({username: req.params.username}, (error, user) => {
 		if (error) {
 			console.log(error);
-			return res.status(500).send({
-				error: error
+			return res.send({
+				success: false
 			});
 		}
 		return res.status(200).send({
+			success: true,
 			user: user
 		});
 	});
@@ -123,11 +125,13 @@ userRoute.route('/update/:username').put((req, res) => {
 				user.save((error) => {
 					if (error) {
 						console.log(error);
-						return res.status(500).send({
-							error: error
+						return res.send({
+							success: false
 						});
 					}
-					return res.status(200).send();
+					return res.status(200).send({
+						success: true
+					});
 				});
 			});
 		}
@@ -149,8 +153,8 @@ userRoute.route('/updateToken/:username').put((req, res) => {
 			User.findById(id, (error, user) => {
 				if (error) {
 					console.log(error);
-					return res.status(500).send({
-						error: error
+					return res.send({
+						success: false
 					});
 				}
 				user.access_token = req.body.access_token;
@@ -162,7 +166,9 @@ userRoute.route('/updateToken/:username').put((req, res) => {
 							error: error
 						});
 					}
-					return res.status(200).send();
+					return res.status(200).send({
+						success: true
+					});
 				});
 			});
 		}
@@ -175,13 +181,15 @@ userRoute.route('/delete/:id').delete((req, res) => {
 		_id: req.params.id,
 	}, (error) => {
 		if (error) {
-			console.log('\n'+error+'\n');
-			return res.status(500).send({
-				error: error
+			console.log(error);
+			return res.send({
+				success: false
 			});
 		}
-		console.log('\nuser deleted\n');
-		return res.status(200).send();
+		console.log('user deleted');
+		return res.status(200).send({
+			success: true
+		});
 	});
 });
 

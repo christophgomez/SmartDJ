@@ -10,6 +10,8 @@ const my_client_secret = "59803c9ee3eb43858252938d3d945713";
 
 // Set up the app
 const app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -53,13 +55,10 @@ db.once('open', function (callback) {
 			console.log('no users');
 		}
 	})
-	const spotifyRoutes = require('./expressRoutes/spotifyRoutes.js');
+	const spotifyRoutes = require('./expressRoutes/spotifyRoutes.js')(app, io);
 	app.use('/spotify', spotifyRoutes);
 	const userRoutes = require('./expressRoutes/userRoutes.js');
 	app.use('/users', userRoutes);
-
-	// Set up the server to listen for connections
-	const server = http.createServer(app);
 
 	var port = 8081;
 
