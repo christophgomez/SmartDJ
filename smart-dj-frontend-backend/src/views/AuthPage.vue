@@ -20,6 +20,9 @@ export default {
     }
   },
   created() {
+    window.onbeforeunload = function () {
+      window.opener.checkTempToken();
+    }
     this.code = this.$route.query.code;
     if(this.code == undefined) {
       this.type='Failed';
@@ -31,7 +34,6 @@ export default {
       var code = this.code;
       const response = await SpotifyService.exchange({code});
       window.close();
-      /*this.$router.push({ name: 'profile', params: {name: response.data.name, birthday: response.data.birthday, email: response.data.email, url: response.data.url, followers: response.data.followers, type: response.data.type }});*/
     }
   }
 }

@@ -55,6 +55,7 @@ export default {
       sending: false,
       lastUser: null,
       spotify: true,
+      authWindow: Window
     }
   },
   validations: {
@@ -73,7 +74,12 @@ export default {
     }
   },
   created() {
-    // this.clearAccessToken();
+    this.authWindow = window;
+		var self = this;
+		this.authWindow.checkTempToken = function() {
+			console.log("cehcking token");
+			self.checkTempToken();
+		}
   },
   methods: {
     getValidationClass(fieldName) {
@@ -94,9 +100,7 @@ export default {
       this.$v.form.repeatPassword.$model = '';
       this.$v.$reset();
     },
-    async saveUser() {
-      this.sending = true;
-      // Instead of this timeout, here you can call your API
+    async checkTempToken() {
       const response = await SpotifyService.checkTempAccessToken();
       if(response.data.success === true) {
         this.spotify = true;
@@ -105,12 +109,11 @@ export default {
       } else {
         this.spotify = false;
         console.log('spotify false');
-        return;
       }
-      this.sending = true;
+    },
+    async saveUser() {
       //console.log(this.$v.form.userName.$model);
-      console.log(response.data.access_token);
-      const spotifyResponse = await SpotifyService.getUserProfile(response.data.access_token);
+      const spotifyResponse = await SpotifyService.getUserProfile(this.access_token);
       const response2 = await UserService.createUser({
         username: this.$v.form.userName.$model,
         password: this.$v.form.password.$model,
@@ -122,7 +125,7 @@ export default {
       if(response2.data.success === true) {
         console.log('user saved')
         this.userSaved = true;
-        localStorage.setItem('jwtToken', response.data.token);
+        localStorage.setItem('jwtToken', response2.data.token);
         console.log('username: '+this.$v.form.userName.$model);
         localStorage.setItem('username', this.$v.form.userName.$model);
         this.player();
@@ -142,7 +145,7 @@ export default {
     async openWindow() {
       const response = await SpotifyService.login();
       var url = (response.data.redirect);
-      var myWindow = window.open(url, '_blank', "height=500,width=500,toolbar=no,menubar=no,scrollbars=no,location=no,status=no left=300 top=200");
+      window.open(url, '_blank', "height=500,width=500,toolbar=no,menubar=no,scrollbars=no,location=no,status=no left=300 top=200");
     },
     async player() {
 			const response = await SpotifyService.startPlayer();

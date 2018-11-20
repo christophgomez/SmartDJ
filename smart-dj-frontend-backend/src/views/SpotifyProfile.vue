@@ -77,7 +77,6 @@ export default {
 			const userResponse = await UserService.getUser(this.$route.params.username);
 			this.access_token = userResponse.data.user.access_token;
 			console.log('getting profile');
-			console.log('access token: '+this.access_token);
 			const response = await SpotifyService.getUserProfile(this.access_token);
 			this.name = response.data.name;
 			this.birthday = response.data.birthday;
@@ -89,7 +88,7 @@ export default {
 			this.$wait.end('User Information');
 		},
 		async currentlyPlaying() {
-			const response = await SpotifyService.getCurrentlyPlaying();
+			const response = await SpotifyService.getUserCurrentlyPlaying(this.access_token);
 			if(this.top_artists) {
 				this.top_artists = false;
 			}
@@ -98,14 +97,14 @@ export default {
 				this.artist = 'User is not playing anything right now';
 				this.track = '';
 			} else {
-				this.artist = response.data.item.album.artists[0].name;
-				this.album = response.data.item.album.name;
+				this.artist = response.data.object.item.album.artists[0].name;
+				this.album = response.data.object.item.album.name;
 				this.track = this.album + " | "+ response.data.item.name;
 			}
 		},
 		async topArtists() {
 			this.artists = [];
-			const response = await SpotifyService.getTopArtists();
+			const response = await SpotifyService.getUserTopArtists(this.access_token);
 			if(this.curr_playing) {
 				this.curr_playing = false;
 			}
@@ -117,10 +116,14 @@ export default {
 			}
 		},
 		async next() {
-			await SpotifyService.nextTrack();
+			await SpotifyService.nextUserTrack({
+				access_token: this.access_token
+			});
 		},
 		async prev() {
-			await SpotifyService.previousTrack();
+			await SpotifyService.previousUserTrack({
+				access_token: this.access_token
+			});
 		},
 		async player() {
 			const response = await SpotifyService.startPlayer();

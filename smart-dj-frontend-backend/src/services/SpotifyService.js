@@ -7,34 +7,55 @@ export default {
 	exchange(params) {
 		return Api().post('authorize', params);
 	},
+	getPrimaryToken() {
+		return Api().get('access_token/primary');
+	},
+	updatePrimaryToken(params) {
+		return Api().post('access_token/primary', params);
+	},
+	deletePrimaryAccessToken() {
+		return Api().delete('access_token/primary');
+	},
 	checkTempAccessToken() {
 		return Api().get('access_token/temp');
 	},
-	deleteAccessToken() {
-		return Api().delete('access_token/primary');
+	deleteTempAccessToken() {
+		return Api().delete('access_token/temp');
 	},
-	getCurrentlyPlaying() {
-		return Api().get('currently_playing');
+	refreshTempAccessToken(params) {
+		return Api().post(`access_token/temp/refresh`, params);
 	},
-	getTopArtists() {
-		return Api().get('top_artists');
+	getUserCurrentlyPlaying(token) {
+		return Api().get(`currently_playing/user/${token}`);
+	},
+	getPrimaryCurrentlyPlaying() {
+		return Api().get('currently_playing/primary');
+	},
+	getUserTopArtists(token) {
+		return Api().get(`top_artists/user/${token}`);
+	},
+	getPrimaryDevices() {
+		return Api().get('devices/primary');
+	},
+	getUserDevices(params) {
+		return Api().get('devices/user', params);
 	},
 	startPlayer() {
 		return Api().get('player');
 	},
-	nextTrack() {
-		return Api().post('next');
+	nextUserTrack(params) {
+		return Api().post('next/user', params);
 	},
-	previousTrack() {
-		return Api().post('prev');
+	previousUserTrack(params) {
+		return Api().post('prev/user', params);
+	},
+	nextPrimaryTrack() {
+		return Api().post('next/kinect');
+	},
+	previousPrimaryTrack() {
+		return Api().post('prev/kinect');
 	},
 	getUserProfile(token) {
 		return Api().get(`profile/${token}`);
-	},
-	refreshTempAccessToken(params) {
-		return Api().post('access_token/temp/refresh', params);
-	},
-	getPrimaryToken() {
-		return Api().get('access_token/primary');
 	}
 };
