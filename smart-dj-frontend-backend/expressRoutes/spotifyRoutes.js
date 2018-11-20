@@ -5,12 +5,13 @@ var exec = require('child_process').exec;
 const Token = require('../models/token');
 const User = require('../models/user');
 const mongoose = require('mongoose');
+const config = require('../config/settings');
 
 module.exports = function (app, io) {
 	var spotifyRoute = express.Router();
-	const my_client_id = "c59420679278498bbd4186dd101f3f04";
-	const my_client_secret = "59803c9ee3eb43858252938d3d945713";
-	const redirect_uri = "http://chrisbook.local:8080/success";
+	const my_client_id = config.spotifyClientID;
+	const my_client_secret = config.spotifyClientSecret;
+	const redirect_uri = config.baseURL + config.clientPort + "/success";
 	var primary_access_token = app.get('primary_access_token');
 	var primary_refresh_token = app.get('primary_refresh_token');
 	var temp_access_token;
