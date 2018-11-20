@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
+const config = require('../config/settings');
 import Vuelidate from 'vuelidate'
 
 import VueMaterial from 'vue-material'
@@ -27,7 +28,7 @@ import VueWait from 'vue-wait'
 Vue.use(VueWait);
 
 Vue.use(new VueSocketIO({
-  connection: 'http://chrisbook.local:8081',
+  connection: config.baseURL+config.serverPort,
 }));
 
 library.add(faTrash);

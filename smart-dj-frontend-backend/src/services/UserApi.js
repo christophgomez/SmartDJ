@@ -1,7 +1,8 @@
 import axios from 'axios';
+const config = require('../../config/settings');
 
 export default () => {
 	return axios.create({
-		baseURL: 'http://chrisbook.local:8081/users'
+		baseURL: config.baseURL+config.serverPort+'/users'
 	});
 };

@@ -1,8 +1,9 @@
 import axios from 'axios';
+const config = require('../../config/settings');
 /* eslint-disable */
 
 export default () => {
 	return axios.create({
-		baseURL: 'http://chrisbook.local:8081/spotify/',
+		baseURL: config.baseURL+config.serverPort+'/spotify',
 	});
 };

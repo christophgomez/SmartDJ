@@ -5,8 +5,9 @@ const cors = require('cors');
 const morgan = require('morgan');
 const http = require('http');
 var request = require('request');
-const my_client_id = "c59420679278498bbd4186dd101f3f04";
-const my_client_secret = "59803c9ee3eb43858252938d3d945713";
+var config = require('./config/settings');
+const my_client_id = config.spotifyCliendId;
+const my_client_secret = config.spotifyClientSecret;
 
 // Set up the app
 const app = express();
@@ -60,7 +61,7 @@ db.once('open', function (callback) {
 	const userRoutes = require('./expressRoutes/userRoutes.js');
 	app.use('/users', userRoutes);
 
-	var port = 8081;
+	var port = config.serverPort;
 
 	// Listen for connections to the port
 	server.listen(port, () => console.log('Server listening on port ' + port));
