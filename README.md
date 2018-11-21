@@ -6,6 +6,11 @@ Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 npm install
 ```
 
+<b>Make sure MongoDB is installed,</b> if you don't have it installed you can find instructions here:<br>
+macOS - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/ <br>
+Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
+
+
 ### Some code changes required if you are using this for development: 
 
 In `smart-dj-frontend-backend/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
