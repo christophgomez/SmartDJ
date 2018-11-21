@@ -2,6 +2,7 @@
 Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 
 ## Initial Project setup
+Download the project and cd into the `smart-dj-frontend-backend` folder, then run:
 ```
 npm install
 ```
