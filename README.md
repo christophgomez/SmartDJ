@@ -210,7 +210,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Request Body Data:
       <pre lang='js'>
 {
-  id: String // The Device ID
+  id: String //device id
 }</pre>
     </td>
   </tr>
