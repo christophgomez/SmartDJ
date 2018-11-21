@@ -109,6 +109,17 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Success Response Object</td>
   </tr>
   <tr>
+    <td>POST</td>
+    <td>/spotify/test</td>
+    <td>Send Test Data to the Server</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  data:String,
+}</pre>
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
     <td>GET</td>
     <td>/spotify/login</td>
     <td>Get a Spotify Login/Auth Page</td>
