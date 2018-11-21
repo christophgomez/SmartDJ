@@ -206,13 +206,13 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   <tr>
     <td>POST</td>
     <td>/spotify/kinect/device_id</td>
-    <td>Used to end the WebPlayer's device ID to the server</td>
-    <td>Request Body Data:
+    <td>Used to send the WebPlayer's device ID to the server</td>
+    <td>Request Body Data: <br>(The ID of the device to transfer too)
       <pre lang='js'>
 {
-  id: String // The Device ID
-}</pre>
-    </td>
+  id: String
+}</pre></td>
+     <td>Success Response object</td>
   </tr>
   <tr>
     <td>GET</td>
@@ -278,10 +278,10 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>PUT</td>
     <td>/spotify/user/transfer</td>
     <td>Transfer User's Current Playback to an Active Device</td>
-    <td>Request Body Data:
+    <td>Request Body Data:<br>(The ID of the device to transfer too)
       <pre lang='js'>
 {
-  id:String // The Device ID
+  id:String
   access_token:String,
 }</pre>
     </td>
