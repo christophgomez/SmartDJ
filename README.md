@@ -30,17 +30,17 @@ Move `smart-dj-frontend-backend/webplayer.html` to the C drive
 In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line 291:
 ```js
 exec('open -a "Google Chrome" ./webPlayer.html', () => {
-	return res.status(200).send({
-		message: 'child process created'
-	});
+  return res.status(200).send({
+    message: 'child process created'
+  });
 });
 ```
 to 
 ```js
 exec('start chrome file:\\\C:\webplayer.html', () => {
-	return res.status(200).send({
-		message: 'child process created'
-	});
+  return res.status(200).send({
+    message: 'child process created'
+  });
 });
 ```
 
