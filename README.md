@@ -13,14 +13,14 @@ In `smart-dj-frontend-backend/config/settings.js` change baseURL value to: `http
 In `smart-dj-frontend-backend/webPlayer.html` change 
 ```js
 const api = axios.create({
-        baseURL: 'http://chrisbook.local:8081/spotify/'
-      });
+  baseURL: 'http://chrisbook.local:8081/spotify/'
+});
 ```
 to 
 ```js
 const api = axios.create({
-        baseURL: 'http://localhost:8081/spotify/'
-      });
+  baseURL: 'http://localhost:8081/spotify/'
+});
 ```
 
 <b>If you're developing on Windows:</b>
@@ -30,18 +30,18 @@ Move `smart-dj-frontend-backend/webplayer.html` to the C drive
 In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line 291:
 ```js
 exec('open -a "Google Chrome" ./webPlayer.html', () => {
-			return res.status(200).send({
-				message: 'child process created'
-			});
-		});
+	return res.status(200).send({
+		message: 'child process created'
+	});
+});
 ```
 to 
 ```js
 exec('start chrome file:\\\C:\webplayer.html', () => {
-			return res.status(200).send({
-				message: 'child process created'
-			});
-		});
+	return res.status(200).send({
+		message: 'child process created'
+	});
+});
 ```
 
 ### Start the Database
