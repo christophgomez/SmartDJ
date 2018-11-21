@@ -55,6 +55,21 @@ module.exports = function (app, io) {
    	});
 	});
 
+	spotifyRoute.route('/test').post((req, res) => {
+		console.log('server received test POST, chacking data');
+		if (req.body.data) {
+			console.log('Data: ' + req.body.data);
+			return res.send({
+				success: true
+			});
+		} else {
+			console.log('No data');
+			return res.send({
+				success: false
+			});
+		}
+	});
+
 	spotifyRoute.route('/login').get((req, res) => {
 		var scopes = 'playlist-read-private playlist-modify-public playlist-modify-private playlist-read-collaborative user-read-private user-read-birthdate user-read-email user-read-playback-state user-read-currently-playing user-modify-playback-state app-remote-control streaming user-top-read user-read-recently-played user-library-read user-library-modify';
 
@@ -314,7 +329,9 @@ module.exports = function (app, io) {
 
 	spotifyRoute.route('/kinect/device_id').post((req, res) => {
 		kinect_id = req.body.id;
-		return res.status(204).send();
+		return res.status(204).send({
+			success: true
+		});
 	});
 
 	spotifyRoute.route('/kinect/devices').get((req, res) => {
