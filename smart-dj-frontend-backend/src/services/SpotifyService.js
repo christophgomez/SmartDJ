@@ -26,36 +26,36 @@ export default {
 		return Api().post(`/access_token/temp/refresh`, params);
 	},
 	getUserCurrentlyPlaying(token) {
-		return Api().get(`/currently_playing/user/${token}`);
+		return Api().get(`/user/currently_playing/${token}`);
 	},
 	getPrimaryCurrentlyPlaying() {
-		return Api().get('/currently_playing/primary');
+		return Api().get('/kinect/currently_playing');
 	},
 	getUserTopArtists(token) {
-		return Api().get(`/top_artists/user/${token}`);
+		return Api().get(`/user/top_artists/${token}`);
 	},
 	getPrimaryDevices() {
-		return Api().get('/devices/primary');
+		return Api().get('/kinect/devices');
 	},
 	getUserDevices(params) {
-		return Api().get('/devices/user', params);
+		return Api().get('/user/devices', params);
 	},
 	startPlayer() {
-		return Api().get('/player');
+		return Api().post('/kinect/player');
 	},
 	nextUserTrack(params) {
-		return Api().post('/next/user', params);
+		return Api().post('/user/next', params);
 	},
 	previousUserTrack(params) {
-		return Api().post('/prev/user', params);
+		return Api().post('/user/prev', params);
 	},
 	nextPrimaryTrack() {
-		return Api().post('/next/kinect');
+		return Api().post('/kinect/next');
 	},
 	previousPrimaryTrack() {
-		return Api().post('/prev/kinect');
+		return Api().post('/kinect/prev');
 	},
 	getUserProfile(token) {
-		return Api().get(`/profile/${token}`);
+		return Api().get(`/user/${token}`);
 	}
 };

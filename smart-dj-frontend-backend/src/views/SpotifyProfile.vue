@@ -97,9 +97,9 @@ export default {
 				this.artist = 'User is not playing anything right now';
 				this.track = '';
 			} else {
-				this.artist = response.data.object.item.album.artists[0].name;
 				this.album = response.data.object.item.album.name;
-				this.track = this.album + " | "+ response.data.item.name;
+				this.artist = response.data.object.item.album.artists[0].name +" | "+this.album;
+				this.track = response.data.object.item.name;
 			}
 		},
 		async topArtists() {
