@@ -65,7 +65,7 @@ npm run server
 npm run serve
 ```
 
-## Sotify API Routes
+## Spotify API Routes
 All requests should be sent to the base server address (`http://localhost:8081`)
 
 Almost all requests return a JSON formatted object, which will be referred to as a Response Object.
