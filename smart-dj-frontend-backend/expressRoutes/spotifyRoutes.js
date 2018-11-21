@@ -9,7 +9,7 @@ const config = require('../config/settings');
 
 module.exports = function (app, io) {
 	var spotifyRoute = express.Router();
-	const my_client_id = config.spotifyClientID;
+	const my_client_id = config.spotifyClientId;
 	const my_client_secret = config.spotifyClientSecret;
 	const redirect_uri = config.baseURL + config.clientPort + "/success";
 	var primary_access_token = app.get('primary_access_token');
@@ -44,7 +44,7 @@ module.exports = function (app, io) {
 	setInterval(() => {
 		refreshPrimaryToken();
 		refreshAllUserTokens();
-	}, 300000);
+	}, 900000);
 
 	/***********************************ROUTES**********************************************/
 
@@ -84,7 +84,6 @@ module.exports = function (app, io) {
 			},
 			json: true
 		};
-	
 		request.post(authOptions, function (error, response, body) {
 			if (!error && response.statusCode === 200) {
 				console.log('spotify auth successful');
@@ -230,22 +229,21 @@ module.exports = function (app, io) {
 
 						primary_access_token = body.access_token;
 						console.log('Access token refreshed');
-						console.log('primary access_token: ' + primary_access_token);
-						console.log('primary refresh_token: ' + primary_refresh_token);
 						token.access_token = primary_access_token;
 						token.refresh_token = primary_refresh_token;
 						token.save((err) => {
 							if (err) console.log(err);
 							else {
 								return res.status(200).send({
-									msg: 'refresh successful',
+									success: true,
 								});
 							}
 						})
 					} else {
-						console.log(response.statusCode);
-						console.log(response.body.error_description);
-						console.log('primary refresh unsuccessful');
+						console.log(body);
+						return res.send({
+							success: false
+						});
 					}
 				});
 			}
@@ -275,74 +273,83 @@ module.exports = function (app, io) {
 		return res.send({
 			success: true
 		});
-	})
-
-	spotifyRoute.route('/access_token/temp/refresh').post((req, res) => {
-		console.log('refreshing temp token');
-		temp_refresh_token = req.body.refresh_token;
-		return refreshToken(temp_refresh_token, res);
 	});
 
-	spotifyRoute.route('/profile/:token').get((req, res) => {
+	spotifyRoute.route('/user/:token').get((req, res) => {
 		return getProfile(req.params.token, res);
 	});
 
-	spotifyRoute.route('/player').get((req, res) => {
+	spotifyRoute.route('/kinect/player').post((req, res) => {
 		exec('open -a "Google Chrome" ./webPlayer.html', () => {
 			return res.status(200).send({
+				success: true,
 				message: 'child process created'
 			});
 		});
 	});
 
-	spotifyRoute.route('/transfer/kinect').put(() => {
-		transferPlayback(kinect_id, primary_access_token);
+	spotifyRoute.route('/kinect/transfer').put((req, res) => {
+		if (transferPlayback(kinect_id, primary_access_token)) {
+			return res.send({
+				success: true
+			});
+		} else {
+			return res.send({
+				success: false
+			});
+		}
 	});
 
-	spotifyRoute.route('/transfer/other_device').put((req) => {
-		transferPlayback(req.body.id, { access_token: req.body.access_token });
+	spotifyRoute.route('/user/transfer').put((req, res) => {
+		if (transferPlayback(req.body.id, { access_token: req.body.access_token })) {
+			return res.send({
+				success: true
+			});
+		} else {
+			return res.send({
+				success: false
+			});
+		}
 	})
 
-	spotifyRoute.route('/device_id').post((req, res) => {
+	spotifyRoute.route('/kinect/device_id').post((req, res) => {
 		kinect_id = req.body.id;
 		return res.status(204).send();
 	});
 
-	spotifyRoute.route('/devices/primary').get((req, res) => {
+	spotifyRoute.route('/kinect/devices').get((req, res) => {
 		return getDevices(primary_access_token, res);
 	});
 
-	spotifyRoute.route('/devices/user').get((req, res) => {
-		return getDevices(req.body.access_token, res);
+	spotifyRoute.route('/user/devices/:token').get((req, res) => {
+		return getDevices(req.params.token, res);
 	});
 
-	spotifyRoute.route('/currently_playing/user/:token').get((req, res) => {
-		console.log('getting currently playing');
+	spotifyRoute.route('/user/currently_playing/:token').get((req, res) => {
 		return getCurrentPlaying(req.params.token, res);
 	});
 
-	spotifyRoute.route('/currently_playing/primary').get((req, res) => {
-		console.log('getting currently playing');
+	spotifyRoute.route('/kinect/currently_playing').get((req, res) => {
 		return getCurrentPlaying(primary_access_token, res);
 	});
 
-	spotifyRoute.route('/top_artists/user/:token').get((req, res) => {
+	spotifyRoute.route('/user/top_artists/:token').get((req, res) => {
 		return getTopArtists(req.params.token, res);
 	});
 
-	spotifyRoute.route('/next/user').post((req, res) => {
+	spotifyRoute.route('/user/next').post((req, res) => {
 		return next(req.body.access_token, res);
 	});
 
-	spotifyRoute.route('/prev/user').post((req, res) => {
+	spotifyRoute.route('/user/prev').post((req, res) => {
 		return prev(req.body.access_token, res);
 	});
 
-	spotifyRoute.route('/next/kinect').post((req, res) => {
+	spotifyRoute.route('/kinect/next').post((req, res) => {
 		return next(primary_access_token, res);
 	});
 
-	spotifyRoute.route('/prev/kinect').post((req, res) => {
+	spotifyRoute.route('/kinect/prev').post((req, res) => {
 		return prev(primary_access_token, res);
 	});
 
@@ -376,11 +383,12 @@ module.exports = function (app, io) {
 			if (!error && response.statusCode === 200) {
 				return res.send({
 					success: true,
+					fullProfileResponse: body,
 					birthday: body.birthdate,
 					name: body.display_name,
 					email: body.email,
 					url: body.external_urls.spotify,
-					followers: body.followers.total,
+					followerTotal: body.followers.total,
 					type: body.product,
 				});
 			} else {
@@ -419,7 +427,7 @@ module.exports = function (app, io) {
 				return res.status(200).send({
 					success: true,
 					is_playing: false,
-					item: null
+					object: null
 				});
 			} else {
 				console.log(body);
@@ -491,7 +499,7 @@ module.exports = function (app, io) {
 
 	function transferPlayback(id, token) {
 		if (token === undefined) {
-				return;
+			return false;
 		}
 		var options = {
 			url: "https://api.spotify.com/v1/me/player",
@@ -509,8 +517,10 @@ module.exports = function (app, io) {
 		request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('playback started on webplayer');
+				return true;
 			} else {
 				console.log(body);
+				return false;
 			}
 		});
 	}
@@ -610,7 +620,6 @@ module.exports = function (app, io) {
 	}
 
 	function refreshAllUserTokens() {
-		console.log('refreshing all users in spotify routes');
 		User.find({}, (err, users) => {
 			if (err) console.log(err);
 			if (!users) console.log('No users to refresh tokens');
@@ -628,22 +637,25 @@ module.exports = function (app, io) {
 							},
 							json: true
 						};
-
+						console.log(authOptions.headers.Authorization);
 						request.post(authOptions, function (error, response, body) {
 							if (!error && response.statusCode === 200) {
 								console.log('User access token refreshed');
 								users[i].access_token = body.access_token;
 								users[i].save((err) => {
 									if (err) console.log(err);
+									else {
+										console.log('user token saved');
+									}
 								});
 							} else {
-								console.log('refresh unsuccessful');
+								console.log('user refresh unsuccessful');
+								console.log(response.body);
 							}
 						});
 					})(i);
 				}
 			}
-			console.log('all users refreshed');
 		});
 	}
 
@@ -673,11 +685,12 @@ module.exports = function (app, io) {
 						token.save((err) => {
 							if (err) console.log(err);
 							else {
-								console.log('primary refresh successful');
+								console.log('primary token saved');
 							}
 						});
 					} else {
 						console.log('primary refresh unsuccessful');
+						console.log(body);
 					}
 				});
 			}

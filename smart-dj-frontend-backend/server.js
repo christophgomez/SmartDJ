@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const http = require('http');
 var request = require('request');
 var config = require('./config/settings');
-const my_client_id = config.spotifyCliendId;
+const my_client_id = config.spotifyClientId;
 const my_client_secret = config.spotifyClientSecret;
 
 // Set up the app
@@ -85,7 +85,7 @@ function refreshAllUserTokens() {
 						},
 						json: true
 					};
-
+					console.log(authOptions.headers.Authorization);
 					request.post(authOptions, function (error, response, body) {
 						if (!error && response.statusCode === 200) {
 							console.log('User access token refreshed');
@@ -118,7 +118,8 @@ function refreshPrimaryToken(token) {
 		},
 		json: true
 	};
-
+	console.log(my_client_id + " " + my_client_secret);
+	console.log(authOptions.headers.Authorization);
 	request.post(authOptions, function (error, response, body) {
 		if (!error && response.statusCode === 200) {
 
