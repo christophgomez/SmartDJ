@@ -37,11 +37,23 @@ export default {
 	getPrimaryDevices() {
 		return Api().get('/kinect/devices');
 	},
-	getUserDevices(params) {
-		return Api().get('/user/devices', params);
+	getUserDevices(token) {
+		return Api().get(`/user/devices/${token}`,);
 	},
 	startPlayer() {
 		return Api().post('/kinect/player');
+	},
+	playPrimary() {
+		return Api().put('/kinect/play');
+	},
+	playUser(params) {
+		return Api().put('/user/play', params);
+	},
+	pausePrimary() {
+		return Api().put('/kinect/pause');
+	},
+	pauseUser(params) {
+		return Api().put('/user/pause');
 	},
 	nextUserTrack(params) {
 		return Api().post('/user/next', params);

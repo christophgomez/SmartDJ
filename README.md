@@ -1,9 +1,12 @@
 # SmartDJ
+
 Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 
 ## Initial Project setup
+
 Download the project and cd into the `smart-dj-frontend-backend` folder, then run:
-```
+
+```bash
 npm install
 ```
 
@@ -12,17 +15,20 @@ macOS - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/ <br>
 Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
 
 
-### Some code changes required if you are using this for development: 
+### Some code changes required if you are using this for development 
 
 In `smart-dj-frontend-backend/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
 
-In `smart-dj-frontend-backend/webPlayer.html` change 
+In `smart-dj-frontend-backend/webPlayer.html` change
+
 ```js
 const api = axios.create({
   baseURL: 'http://chrisbook.local:8081/spotify/'
 });
 ```
-to 
+
+to
+
 ```js
 const api = axios.create({
   baseURL: 'http://localhost:8081/spotify/'
@@ -34,6 +40,7 @@ const api = axios.create({
 Move `smart-dj-frontend-backend/webplayer.html` to the C drive
 
 In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line 291:
+
 ```js
 exec('open -a "Google Chrome" ./webPlayer.html', () => {
   return res.status(200).send({
@@ -41,7 +48,9 @@ exec('open -a "Google Chrome" ./webPlayer.html', () => {
   });
 });
 ```
-to 
+
+to
+
 ```js
 exec('start chrome file:\\\C:\webplayer.html', () => {
   return res.status(200).send({
@@ -53,40 +62,50 @@ exec('start chrome file:\\\C:\webplayer.html', () => {
 ### Start the Database
 
 On Mac in terminal execute:
-```
+
+```bash
 mongod
 ```
+
 On Windows in cmd execute:
-```
+
+```bash
 "C:\Program Files\MongoDB\Server\3.2\bin\mongod.exe"
 ```
 
 ### Start the Backend
-```
+
+```bash
 npm run server
 ```
 
 ### Start the Frontend
-```
+
+```bash
 npm run serve
 ```
 
 ## Spotify API Routes
+
 All requests should be sent to the base server address (`http://localhost:8081`)
 
 Almost all requests return a JSON formatted object, which will be referred to as a Response Object.
+
 ```js
 {
    property1: value1,
    property2: value2
 }
 ```
+
 Many requests return a simple true/false success, which will be reffered to as a Success Response Object.
+
 ```js
 {
    success: true/false
 }
 ```
+
 Some responses contain additional data when success is true. I will explicity state the data. If nothing but 'Success Response Object' is listed, the access point doesn't return anything besides success. If success is equal to false, the response will not contain the value
 
 Parameters come in two forms: HTTP Request Body data and URL Params.
@@ -180,7 +199,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   </tr>
   <tr>
     <td>POST</td>
-    <td>spotify/access_token/primary/refresh</td>
+    <td>/spotify/access_token/primary/refresh</td>
     <td>Refresh the System Primary Token</td>
     <td>None</td>
     <td>Success Response Object</td>
@@ -255,6 +274,20 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   devices: [{}]
 }</pre>
     </td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/play</td>
+    <td>Play the Primary Account's current playback</td>
+    <td>None</td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/pause</td>
+    <td>Pause the Primary Account's current playback</td>
+    <td>None</td>
+    <td>Success Response Object</td>
   </tr>
   <tr>
     <td>POST</td>
@@ -350,6 +383,30 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   artists: [],
 }</pre>
     </td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/user/play</td>
+    <td>Play a user's current playback</td>
+    <td>Request Body Data:
+      <pre lang='js'>
+{
+  access_token:String
+}</pre>
+    </td>
+    <td>Response Success Object</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/user/pause</td>
+    <td>Pause a user's current playback</td>
+    <td>Request Body Data:
+      <pre lang='js'>
+{
+  access_token:String
+}</pre>
+    </td>
+    <td>Response Success Object</td>
   </tr>
   <tr>
     <td>POST</td>

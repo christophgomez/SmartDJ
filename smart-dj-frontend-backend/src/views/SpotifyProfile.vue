@@ -8,27 +8,47 @@
 			<hr style='width:35%'>
 			<h2 style='display:inline;margin-right:10px;'>{{name}}</h2><small><p style='display:inline'> Followers: {{followers}}</p></small>
 			<h3>Birthday: {{birthday}}</h3>
-			<div v-if='curr_playing===true'>
+			<div v-if='onCurrPlaying===true'>
+				<br>
 				<h3>Currently Listening To: </h3>
 				<b>{{artist}}</b><br>
 				<b>{{track}}</b>
 			</div>
-			<div v-if='top_artists===true'>
+			<div v-if='onTopArtists===true'>
+				<br>
 				<h3>Top 20 Artists: </h3>
 				<ul v-for='(artist) in artists' :key='artist'>
 					<li>{{artist}}</li>
+				</ul>
+			</div>
+			<div v-if='onDevices===true'>
+				<br>
+				<h3>{{deviceTitle}}</h3>
+				<p v-if="deviceTitle==='No Available Devices'">All devices must be off</p>
+				<ul v-for='device in devices' :key='device.name'>
+					<li>Device Name: {{device.name}}</li>
+					<li>Device ID: {{device.id}}</li>
+					<li>Type: {{device.type}}</li>
+					<li>Active: {{device.is_active}}</li>
+					<li>Private Session: {{device.is_private_session}}</li>
+					<li>Volume: {{device.volume_percent}}</li>
 				</ul>
 			</div>
 			<br>
 			<a href='' target="_blank" rel="noopener">{{email}}</a><br>
 			<a :href='url' target="_blank" rel="noopener">{{url}}</a><br>
 			<ul style='margin-top:20px'>
-				<li class='button'><b-button @click='currentlyPlaying'>Get Currently Playing Track</b-button></li>
-				<li class='button'><b-button @click='topArtists'>Get Top Artists</b-button></li>
-				<li class='button'><b-button @click='player'>Start Web Player</b-button></li>
-				<br><br>
-				<li class='button'><b-button @click='prev'>Previous Track</b-button></li>
-				<li class='button'><b-button @click='next'>Next Track</b-button></li>
+				<li class='button'><b-button @click='currentlyPlaying()'>Get Currently Playing Track</b-button></li>
+				<li class='button'><b-button @click='getTopArtists()'>Get Top Artists</b-button></li>
+				<li class='button'><b-btn @click='getDevices()'>Get Devices</b-btn></li>
+				<li class='button'><b-btn>Get Current Track Info</b-btn></li>
+				<br>
+				<br>
+				<li class='button'><b-button @click='player()'>Start Web Player</b-button></li>
+				<br>
+				<br>
+				<li class='button'><b-button @click='prev()'>Previous Track</b-button></li>
+				<li class='button'><b-button @click='next()'>Next Track</b-button></li>
 			</ul>
 			<md-button class="md-raised md-primary" @click='logout()'>Log Out</md-button>
 		</v-wait>
@@ -44,11 +64,12 @@ export default {
 	name: 'Profile',
 	data() {
 		return {
-			curr_playing: false,
+			onCurrPlaying: false,
+			onTopArtists: false,
+			onDevices: false,
 			artist: '',
 			track: '',
 			album: '',
-			top_artists: false,
 			artists: [],
 			name: '',
 			birthday: '',
@@ -56,7 +77,9 @@ export default {
 			url: '',
 			followers: '',
 			type: '',
-			access_token: ''
+			access_token: '',
+			devices: [],
+			deviceTitle: 'Available Devices'
 		}
 	},
 	beforeRouteEnter(to, from, next) {
@@ -70,6 +93,10 @@ export default {
 	},
 	created(){
 		this.getProfile();
+		setInterval(async () => {
+			const tokenResponse = await UserService.getUser(this.$route.params.username);
+			this.access_token = tokenResponse.data.user.access_token;
+		}, 900000);
 	},
 	methods: {
 		async getProfile() {
@@ -82,17 +109,16 @@ export default {
 			this.birthday = response.data.birthday;
 			this.email = response.data.email;
 			this.url = response.data.url;
-			this.followers = response.data.followers;
+			this.followers = response.data.followerTotal;
 			this.type = response.data.type;
 			this.type = this.type.charAt(0).toUpperCase() + this.type.slice(1);
 			this.$wait.end('User Information');
 		},
 		async currentlyPlaying() {
+			this.onTopArtists = false;
+			this.onDevices = false;
 			const response = await SpotifyService.getUserCurrentlyPlaying(this.access_token);
-			if(this.top_artists) {
-				this.top_artists = false;
-			}
-			this.curr_playing = true;
+			this.onCurrPlaying = true;
 			if(response.data.is_playing === false) {
 				this.artist = 'User is not playing anything right now';
 				this.track = '';
@@ -102,16 +128,27 @@ export default {
 				this.track = response.data.object.item.name;
 			}
 		},
-		async topArtists() {
-			this.artists = [];
+		async getTopArtists() {
+			this.onCurrPlaying = false;
+			this.onDevices = false;
 			const response = await SpotifyService.getUserTopArtists(this.access_token);
-			if(this.curr_playing) {
-				this.curr_playing = false;
-			}
-			this.top_artists = true;
-			if(response.data.is_playing !== null) {
+			this.onTopArtists = true;
+			if(response.data.success === true) {
 				for(var i = 0; i < 20; i++) {
 					this.artists.push(response.data.artists[i].name);
+				}
+			}
+		},
+		async getDevices() {
+			this.onCurrPlaying = false;
+			this.onTopArtists = false;
+			const response = await SpotifyService.getUserDevices(this.access_token);
+			this.onDevices = true;
+			if(response.data.success == true) {
+				this.devices = response.data.devices;
+				this.deviceTitle = "Available Devices"
+				if(this.devices[0] === undefined) {
+					this.deviceTitle = 'No Available Devices';
 				}
 			}
 		},

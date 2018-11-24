@@ -85,7 +85,6 @@ function refreshAllUserTokens() {
 						},
 						json: true
 					};
-					console.log(authOptions.headers.Authorization);
 					request.post(authOptions, function (error, response, body) {
 						if (!error && response.statusCode === 200) {
 							console.log('User access token refreshed');
@@ -94,8 +93,7 @@ function refreshAllUserTokens() {
 								if (err) console.log(err);
 							});
 						} else {
-							console.log(response.statusCode);
-							console.log(response.body.error_description);
+							console.log(body);
 							console.log('refresh unsuccessful');
 						}
 					});
@@ -118,8 +116,6 @@ function refreshPrimaryToken(token) {
 		},
 		json: true
 	};
-	console.log(my_client_id + " " + my_client_secret);
-	console.log(authOptions.headers.Authorization);
 	request.post(authOptions, function (error, response, body) {
 		if (!error && response.statusCode === 200) {
 
@@ -133,8 +129,7 @@ function refreshPrimaryToken(token) {
 				}
 			});
 		} else {
-			console.log(response.statusCode);
-			console.log(response.body.error_description);
+			console.log(body);
 			console.log('primary refresh unsuccessful');
 		}
 	});
