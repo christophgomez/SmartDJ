@@ -56,7 +56,7 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/test').post((req, res) => {
-		console.log('server received test POST, chacking data');
+		console.log('server received test POST, checking data');
 		if (req.body.data) {
 			console.log('Data: ' + req.body.data);
 			return res.send({
@@ -74,6 +74,7 @@ module.exports = function (app, io) {
 		var scopes = 'playlist-read-private playlist-modify-public playlist-modify-private playlist-read-collaborative user-read-private user-read-birthdate user-read-email user-read-playback-state user-read-currently-playing user-modify-playback-state app-remote-control streaming user-top-read user-read-recently-played user-library-read user-library-modify';
 
 		return res.status(200).send({
+			success: true,
 			redirect: 'https://accounts.spotify.com/authorize' +
 				'?response_type=code' +
 				'&client_id=' +
@@ -127,6 +128,9 @@ module.exports = function (app, io) {
 				});
 			} else {
 				console.log(body);
+				return res.send({
+					success: false
+				});
 			}
 		});
 	});
@@ -210,10 +214,16 @@ module.exports = function (app, io) {
 		primary_access_token = undefined;
 		primary_refresh_token = undefined;
 		Token.findByIdAndRemove(1, (err, data) => {
-			if (err) console.log(err);
+			if (err) {
+				console.log(err);
+				return res.send({
+					success: false
+				});
+			}
 			else {
 				console.log('Primary Access deleted');
 				return res.status(200).send({
+					success: true,
 					message: 'Access token deleted'
 				});
 			}
@@ -247,7 +257,12 @@ module.exports = function (app, io) {
 						token.access_token = primary_access_token;
 						token.refresh_token = primary_refresh_token;
 						token.save((err) => {
-							if (err) console.log(err);
+							if (err) {
+								console.log(err);
+								return res.send({
+									success: false
+								});
+							}
 							else {
 								return res.status(200).send({
 									success: true,
@@ -266,16 +281,13 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/access_token/temp').get((req, res) => {
-		console.log("checking temp access token");
 		if (temp_access_token !== undefined) {
-			console.log("Temp: " + temp_access_token);
 			return res.status(200).send({
 				success: true,
 				access_token: temp_access_token,
 				refresh_token: temp_refresh_token
 			});
 		} else {
-			console.log("temp undefined");
 			return res.send({
 				success: false
 			});
@@ -290,8 +302,12 @@ module.exports = function (app, io) {
 		});
 	});
 
-	spotifyRoute.route('/user/:token').get((req, res) => {
-		return getProfile(req.params.token, res);
+	spotifyRoute.route('/kinect/currently_playing').get((req, res) => {
+		return getCurrentPlaying(primary_access_token, res);
+	});
+
+	spotifyRoute.route('/kinect/devices').get((req, res) => {
+		return getDevices(primary_access_token, res);
 	});
 
 	spotifyRoute.route('/kinect/player').post((req, res) => {
@@ -300,6 +316,13 @@ module.exports = function (app, io) {
 				success: true,
 				message: 'child process created'
 			});
+		});
+	});
+
+	spotifyRoute.route('/kinect/device_id').post((req, res) => {
+		kinect_id = req.body.id;
+		return res.status(204).send({
+			success: true
 		});
 	});
 
@@ -315,8 +338,30 @@ module.exports = function (app, io) {
 		}
 	});
 
+	spotifyRoute.route('/kinect/play').put((req, res) => {
+		return play(primary_access_token, res);
+	})
+
+	spotifyRoute.route('/kinect/pause').put((req, res) => {
+		return pause(primary_access_token, res);
+	})
+	
+	spotifyRoute.route('/kinect/next').post((req, res) => {
+		return next(primary_access_token, res);
+	});
+
+	spotifyRoute.route('/kinect/prev').post((req, res) => {
+		return prev(primary_access_token, res);
+	});
+
+	spotifyRoute.route('/user/:token').get((req, res) => {
+		return getProfile(req.params.token, res);
+	});
+
 	spotifyRoute.route('/user/transfer').put((req, res) => {
-		if (transferPlayback(req.body.id, { access_token: req.body.access_token })) {
+		if (transferPlayback(req.body.id, {
+				access_token: req.body.access_token
+			})) {
 			return res.send({
 				success: true
 			});
@@ -327,17 +372,6 @@ module.exports = function (app, io) {
 		}
 	})
 
-	spotifyRoute.route('/kinect/device_id').post((req, res) => {
-		kinect_id = req.body.id;
-		return res.status(204).send({
-			success: true
-		});
-	});
-
-	spotifyRoute.route('/kinect/devices').get((req, res) => {
-		return getDevices(primary_access_token, res);
-	});
-
 	spotifyRoute.route('/user/devices/:token').get((req, res) => {
 		return getDevices(req.params.token, res);
 	});
@@ -346,13 +380,17 @@ module.exports = function (app, io) {
 		return getCurrentPlaying(req.params.token, res);
 	});
 
-	spotifyRoute.route('/kinect/currently_playing').get((req, res) => {
-		return getCurrentPlaying(primary_access_token, res);
-	});
-
 	spotifyRoute.route('/user/top_artists/:token').get((req, res) => {
 		return getTopArtists(req.params.token, res);
 	});
+
+	spotifyRoute.route('/user/play').put((req, res) => {
+		return play(req.body.access_token, res);
+	})
+
+	spotifyRoute.route('/user/pause').put((req, res) => {
+		return pause(req.body.access_token, res);
+	})
 
 	spotifyRoute.route('/user/next').post((req, res) => {
 		return next(req.body.access_token, res);
@@ -361,15 +399,6 @@ module.exports = function (app, io) {
 	spotifyRoute.route('/user/prev').post((req, res) => {
 		return prev(req.body.access_token, res);
 	});
-
-	spotifyRoute.route('/kinect/next').post((req, res) => {
-		return next(primary_access_token, res);
-	});
-
-	spotifyRoute.route('/kinect/prev').post((req, res) => {
-		return prev(primary_access_token, res);
-	});
-
 
 
 	/***********************************END ROUTES**********************************************/
@@ -393,8 +422,9 @@ module.exports = function (app, io) {
 
 		request.get(options, function (error, response, body) {
 			if (error) {
+				console.log(error);
 				return res.send({
-					error: error
+					success: false
 				});
 			}
 			if (!error && response.statusCode === 200) {
@@ -542,6 +572,62 @@ module.exports = function (app, io) {
 		});
 	}
 
+	function play(token, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/play",
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				console.log('Play');
+				res.send({
+					success: true
+				});
+			} else {
+				console.log(body);
+				res.send({
+					success: false
+				});
+			}
+		})
+	}
+
+	function pause(token, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/pause",
+			headers: {
+				"Authorization": 'Bearer ' + token,
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				console.log('Pause');
+				res.send({
+					success: true
+				});
+			} else {
+				console.log(body);
+				res.send({
+					success: false
+				});
+			}
+		});
+	}
+
 	function next(token, res) {
 		if (token === undefined) {
 			return res.send({
@@ -654,7 +740,6 @@ module.exports = function (app, io) {
 							},
 							json: true
 						};
-						console.log(authOptions.headers.Authorization);
 						request.post(authOptions, function (error, response, body) {
 							if (!error && response.statusCode === 200) {
 								console.log('User access token refreshed');
@@ -667,7 +752,7 @@ module.exports = function (app, io) {
 								});
 							} else {
 								console.log('user refresh unsuccessful');
-								console.log(response.body);
+								console.log(body);
 							}
 						});
 					})(i);

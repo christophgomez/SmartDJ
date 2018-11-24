@@ -35,12 +35,12 @@
           console.log('received token, making a new player');
           tokenSet = true;
           token = data.token;
+
           this.player = new Spotify.Player({
             name: 'SmartDJ',
             getOAuthToken: cb => {
               api.get('access_token/primary').then((response) => {
-                token = response.access_token;
-                var refresh_token = response.refresh_token;
+                token = response.data.access_token;
               });
               cb(token);
             }
@@ -70,7 +70,6 @@
 
           // Playback status updates
           this.player.addListener('player_state_changed', state => {
-            console.log(state);
             socket.emit('stateChanged', {state});
           });
 

@@ -105,8 +105,8 @@
 											<b-btn @click='prev' class='invertedPlaybackControls'><font-awesome-icon icon='step-backward' /></b-btn>
 										</b-button-group>
 										<b-button-group size="lg" class="mx-1">
-											<b-btn v-if='paused===true' class='invertedPlaybackControls' style='border-radius:50%;'><font-awesome-icon icon='play' /></b-btn>
-											<b-btn v-else-if='paused===false' class='playbackControls' style='border-radius:50%;'><font-awesome-icon icon='pause'/></b-btn>
+											<b-btn v-if='paused===true' @click='play()' class='invertedPlaybackControls' style='border-radius:50%;'><font-awesome-icon icon='play' /></b-btn>
+											<b-btn v-else-if='paused===false' @click='pause()' class='playbackControls' style='border-radius:50%;'><font-awesome-icon icon='pause'/></b-btn>
 										</b-button-group>
 										<b-button-group size="lg" class="mx-1">
 											<b-btn @click='next' class='invertedPlaybackControls'><font-awesome-icon icon='step-forward' /></b-btn>
@@ -195,13 +195,15 @@ export default {
 		this.authWindow = window;
 		var self = this;
 		this.authWindow.checkTempToken = function() {
-			console.log("cehcking token");
 			self.checkTempToken();
 		}
-		this.getUsers();
 		this.getPrimaryAccount();
 		this.getCurrentlyPlaying();
 		this.getPrimaryDevices();
+		this.getUsers();
+		setInterval(() => {
+			this.getPrimaryAccount();
+		}, 900000);
 	},
 	sockets: {
 		stateChanged: function (state) {
@@ -224,6 +226,7 @@ export default {
 					this.title = 'Spotify';
 					break;
 				case 'users':
+					this.getUsers();
 				 	this.onSpotify = false;
 					this.onUsers = true;
 					this.onOtherSettings = false;
@@ -241,36 +244,41 @@ export default {
 			 this.$router.push({name: 'account', params: {username: username}});
 		},
 		async linkAccount() {
+			this.$wait.start('api');
 			await SpotifyService.deleteTempAccessToken();
-      const loginResponse = await SpotifyService.login();
+			const loginResponse = await SpotifyService.login();
+			this.$wait.end('api');
 			var url = (loginResponse.data.redirect);
 			this.authWindow.open(url, '_blank', "height=500,width=500,toolbar=no,menubar=no,scrollbars=no,location=no,status=no left=300 top=200");
 		},
 		async checkTempToken() {
 			this.$wait.start('api');
-				const response = await SpotifyService.checkTempAccessToken();
+			const response = await SpotifyService.checkTempAccessToken();
+			this.$wait.end('api');
       	if(response.data.success === true) {
-					const tokenUpdate = await SpotifyService.updatePrimaryToken({
+				this.$wait.start('api');
+				const tokenUpdate = await SpotifyService.updatePrimaryToken({
 						access_token: response.data.access_token,
 						refresh_token: response.data.refresh_token
-					});
-					if(tokenUpdate.data.success === true) {
-						this.getPrimaryAccount();
-						this.$wait.end('api');
-					} else {
-						this.$wait.end('api');
-						alert("Oops! Something went wrong linking your Spotify Account");
-					}
-      	} else {
-					this.$wait.end('api');
-					alert("Oops! Something went wront linking your Spotify Account");
+				});
+				this.$wait.end('api');
+				if(tokenUpdate.data.success === true) {
+					this.getPrimaryAccount();
+				} else {
+					alert("Oops! Something went wrong linking your Spotify Account");
 				}
+			} 
+			else {
+				alert("Oops! Something went wront linking your Spotify Account");
+			}
 		},
 		async changeActiveToken(item) {
+			this.$wait.start('api');
 			const response = await SpotifyService.updatePrimaryToken({
 				 access_token: item.access_token,
 				 refresh_token: item.refresh_token
 			 });
+			 this.$wait.end('api');
 			 if(response.data.success === false) {
 				 alert("something went wrong changing the primary token");
 			 } else {
@@ -278,7 +286,9 @@ export default {
 			 }
 		 },
 		 async getUsers() {
+			 this.$wait.start('api');
 			 const response = await UserService.fetchUsers();
+			 this.$wait.end('api');
 			 if(response.data.success === true) {
 				 this.users = response.data.users;
 			 } else {
@@ -286,15 +296,23 @@ export default {
 			 }
 		 },
 		 async deleteToken() {
-			 await SpotifyService.deletePrimaryAccessToken();
-			 this.tokenExists = false;
+			 this.$wait.start('api');
+			 const response = await SpotifyService.deletePrimaryAccessToken();
+			 this.$wait.end('api');
+			 if(response.data.success === true)
+			 	this.tokenExists = false;
 		 },
 		 async deleteUser(id) {
-			 await UserService.deleteUser(id);
-			 this.getUsers();
+			 this.$wait.start('api');
+			 const response = await UserService.deleteUser(id);
+			 this.$wait.end('api');
+			 if(response.data.success === true)
+			 	this.getUsers();
 		 },
 		 async getPrimaryAccount() {
+			 this.$wait.start('api');
 			 const response = await SpotifyService.getPrimaryToken();
+			 this.$wait.end('api');
 			 if(response.data.success === true) {
 				 this.access_token = response.data.access_token;
 				 const profileResponse = await SpotifyService.getUserProfile(this.access_token);
@@ -307,6 +325,16 @@ export default {
 				 console.log('Could not get primary token');
 			 }
 		 },
+		async play() {
+			const response = await SpotifyService.playPrimary();
+			if(response.success === true)
+				this.paused = false;
+		},
+		async pause() {
+			const response = await SpotifyService.pausePrimary();
+			if(reponse.success === true)
+				this.paused = true;
+		},
 		async next() {
 			await SpotifyService.nextPrimaryTrack();
 			var self = this;
