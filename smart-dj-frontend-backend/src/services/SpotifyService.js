@@ -53,7 +53,7 @@ export default {
 		return Api().put('/kinect/pause');
 	},
 	pauseUser(params) {
-		return Api().put('/user/pause');
+		return Api().put('/user/pause', params);
 	},
 	nextUserTrack(params) {
 		return Api().post('/user/next', params);
@@ -69,5 +69,14 @@ export default {
 	},
 	getUserProfile(token) {
 		return Api().get(`/user/${token}`);
+	},
+	shufflePrimary(params) {
+		return Api().put('/kinect/shuffle', params);
+	},
+	repeatPrimary(params) {
+		return Api().put('/kinect/repeat', params);
+	},
+	setPrimaryVolume(params) {
+		return Api().put('/kinect/volume', params);
 	}
 };

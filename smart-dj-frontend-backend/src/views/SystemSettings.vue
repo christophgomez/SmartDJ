@@ -102,6 +102,9 @@
 							  		</div>
 									<b-button-toolbar style='margin-left:-5px;' aria-label="Toolbar with button groups">
 										<b-button-group size="lg" class="mx-1">
+											<b-btn v-if='repeatToggle===1' @click='toggleRepeat()' class='invertedPlaybackControls'><font-awesome-icon icon='redo'/></b-btn>
+											<b-btn v-if='repeatToggle===2' @click='toggleRepeat()' class='halfPlaybackControls'><font-awesome-icon icon='redo'/></b-btn>
+											<b-btn v-if='repeatToggle===3' @click='toggleRepeat()' class='playbackControls'><font-awesome-icon icon='redo'/></b-btn>
 											<b-btn @click='prev' class='invertedPlaybackControls'><font-awesome-icon icon='step-backward' /></b-btn>
 										</b-button-group>
 										<b-button-group size="lg" class="mx-1">
@@ -110,8 +113,12 @@
 										</b-button-group>
 										<b-button-group size="lg" class="mx-1">
 											<b-btn @click='next' class='invertedPlaybackControls'><font-awesome-icon icon='step-forward' /></b-btn>
+											<b-btn v-if='shuffle===false' @click='toggleShuffle()' class='invertedPlaybackControls'><font-awesome-icon icon='random'/></b-btn>
+											<b-btn v-if='shuffle===true' class='playbackControls' @click='toggleShuffle()'><font-awesome-icon icon='random'/></b-btn>
 										</b-button-group>
 									</b-button-toolbar>
+									<br>
+									<font-awesome-icon icon='volume-down' size='2x'/><input class='slider' style='width:50%; margin-left:10px;margin-right:10px;' type="range" v-model.number='volume' v-on:input='setVolume(volume)'><font-awesome-icon icon='volume-up' size='2x'/>
 								</b-col>
 								<b-col>
 									
@@ -180,6 +187,9 @@ export default {
 			track: '',
 			paused: true,
 			primaryDevices: [],
+			shuffle: false,
+			repeatToggle: 1,
+			volume: 100,
 		}
 	},
 	beforeRouteEnter(to, from, next) {
@@ -327,12 +337,12 @@ export default {
 		 },
 		async play() {
 			const response = await SpotifyService.playPrimary();
-			if(response.success === true)
+			if(response.data.success === true)
 				this.paused = false;
 		},
 		async pause() {
 			const response = await SpotifyService.pausePrimary();
-			if(reponse.success === true)
+			if(response.data.success === true)
 				this.paused = true;
 		},
 		async next() {
@@ -348,6 +358,44 @@ export default {
 			setTimeout(() => {
 				self.getCurrentlyPlaying();
 			}, 250); 
+		},
+		async toggleShuffle() {
+			if(this.shuffle === false) {
+				const response = await SpotifyService.shufflePrimary({shuffle: true});
+				if(response.data.success === true) {
+					this.shuffle = true;
+				}
+			} else {
+				const response = await SpotifyService.shufflePrimary({shuffle: false});
+				if(response.data.success === true) {
+					this.shuffle = false;
+				}
+			}
+		},
+		async toggleRepeat() {
+			switch(this.repeatToggle) {
+				case 1:
+					const response = await SpotifyService.repeatPrimary({type: 'track'});
+					if(response.data.success === true) {
+						this.repeatToggle = 2;
+					}
+					break;
+				case 2:
+					const response2 = await SpotifyService.repeatPrimary({type: 'context'});
+					if(response2.data.success === true) {
+						this.repeatToggle = 3;
+					}
+					break;
+				case 3: 
+					const response3 = await SpotifyService.repeatPrimary({type: 'off'});
+					if(response3.data.success === true) {
+						this.repeatToggle = 1;
+					}
+					break;
+			}
+		},
+		async setVolume(volume) {
+			await SpotifyService.setPrimaryVolume({volumePercent: volume});
 		},
 		async player() {
 			await SpotifyService.startPlayer();
@@ -430,4 +478,98 @@ export default {
 		border:white;
 		margin-top:10px;
 	}
+	.halfPlaybackControls {
+		color: #42b983;
+		background: linear-gradient(0deg, #42b983 50%, #ffffff 50%);
+		border:white;
+		margin-top:10px;
+	}
+
+	input[type=range].slider {
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 13.8px 0;
+}
+input[type=range].slider:focus {
+  outline: none;
+}
+input[type=range].slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 1), 0px 0px 1px rgba(13, 13, 13, 1);
+  background: #42b983;
+  border-radius: 25px;
+  border: 0px solid rgba(255, 255, 255, 0);
+}
+input[type=range].slider::-webkit-slider-thumb {
+  box-shadow: 0.9px 0.9px 1px rgba(0, 0, 0, 1), 0px 0px 0.9px rgba(13, 13, 13, 1);
+  border: 0px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -13.8px;
+}
+input[type=range].slider:focus::-webkit-slider-runnable-track {
+  background: #53c28f;
+}
+input[type=range].slider::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0px 0px 1px rgba(13, 13, 13, 0);
+  background: #42b983;
+  border-radius: 25px;
+  border: 0px solid rgba(255, 255, 255, 0);
+}
+input[type=range].slider::-moz-range-thumb {
+  box-shadow: 0.9px 0.9px 1px rgba(0, 0, 0, 1), 0px 0px 0.9px rgba(13, 13, 13, 1);
+  border: 0px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range].slider::-ms-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range].slider::-ms-fill-lower {
+  background: #3ba676;
+  border: 0px solid rgba(255, 255, 255, 0);
+  border-radius: 50px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0px 0px 1px rgba(13, 13, 13, 0);
+}
+input[type=range].slider::-ms-fill-upper {
+  background: #42b983;
+  border: 0px solid rgba(255, 255, 255, 0);
+  border-radius: 50px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0px 0px 1px rgba(13, 13, 13, 0);
+}
+input[type=range].slider::-ms-thumb {
+  box-shadow: 0.9px 0.9px 1px rgba(0, 0, 0, 1), 0px 0px 0.9px rgba(13, 13, 13, 1);
+  border: 0px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  height: 8.4px;
+}
+input[type=range].slider:focus::-ms-fill-lower {
+  background: #42b983;
+}
+input[type=range].slider:focus::-ms-fill-upper {
+  background: #53c28f;
+}
+
+	
 </style>

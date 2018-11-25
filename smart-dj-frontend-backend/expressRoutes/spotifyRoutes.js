@@ -354,6 +354,18 @@ module.exports = function (app, io) {
 		return prev(primary_access_token, res);
 	});
 
+	spotifyRoute.route('/kinect/shuffle').put((req, res) => {
+		return shuffle(req.body.shuffle, primary_access_token, res);
+	});
+
+	spotifyRoute.route('/kinect/repeat').put((req, res) => {
+		return repeat(req.body.type, primary_access_token, res);
+	});
+
+	spotifyRoute.route('/kinect/volume').put((req, res) => {
+		return setVolume(req.body.volumePercent, primary_access_token, res);
+	})
+
 	spotifyRoute.route('/user/:token').get((req, res) => {
 		return getProfile(req.params.token, res);
 	});
@@ -510,7 +522,6 @@ module.exports = function (app, io) {
 				return res.send({
 					success: false
 				});
-				//console.log("error getting top artists");
 			}
 		});
 	}
@@ -597,7 +608,7 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		})
+		});
 	}
 
 	function pause(token, res) {
@@ -679,6 +690,90 @@ module.exports = function (app, io) {
 				console.log(body);
 				res.send({
 					success: false
+				});
+			}
+		});
+	}
+
+	function shuffle(trueOrFalse, token, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/shuffle?state=" + trueOrFalse,
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				console.log('Shuffling: ' + trueOrFalse);
+				res.send({
+					success: true
+				});
+			} else {
+				console.log(body);
+				res.send({
+					success: false
+				});
+			}
+		});
+	}
+
+	function repeat(trackContextOff, token, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/repeat?state=" + trackContextOff,
+			headers: {
+				'Authorization': 'Bearer '+token
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				console.log('Repeat: ' + trackContextOff);
+				res.send({
+					success: true
+				});
+			} else {
+				console.log(body);
+				res.send({
+					success: false
+				});
+			}
+		});
+	}
+
+	function setVolume(volumePercent, token, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/volume?volume_percent="+volumePercent,
+			headers: {
+				'Authorization': 'Bearer ' + token
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				console.log("Volume set to: " + volumePercent);
+				res.send({
+					success: true
+				});
+			} else {
+				console.log(body);
+				res.send({
+					success: false,
 				});
 			}
 		});

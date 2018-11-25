@@ -3,6 +3,14 @@
     <div id="nav">
       <router-link to="/">Home</router-link>
       <router-link to="/system_settings">System</router-link>
+      <div id='sign-in'>
+      <div v-if='username !== false'>
+        <p>Signed in as {{ username }}</p>
+      </div>
+      <div v-if='username=== false'>
+        Sign In
+      </div>
+    </div>
     </div>
     <router-view/>
   </div>
@@ -21,12 +29,13 @@ export default {
     }
   },
   created() {
-    console.log(this.$route);
   },
   watch: {
     $route (to, from){
         if(localStorage.username) {
           this.username = localStorage.username;
+        } else {
+          this.username = false;
         }
     }
   } 
@@ -49,6 +58,11 @@ export default {
   font-weight: bold;
   color: #2c3e50;
   margin: 30px;
+}
+
+#sign-in {
+  margin-left:-100%;
+  float: right;
 }
 
 #nav a.router-link-exact-active {

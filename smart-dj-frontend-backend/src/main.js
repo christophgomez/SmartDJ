@@ -21,6 +21,10 @@ import {
   faStepBackward,
   faPlay,
   faPause,
+  faRandom,
+  faRedo,
+  faVolumeUp,
+  faVolumeDown
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -38,6 +42,10 @@ library.add(faStepForward);
 library.add(faStepBackward);
 library.add(faPlay);
 library.add(faPause);
+library.add(faRandom);
+library.add(faRedo);
+library.add(faVolumeUp);
+library.add(faVolumeDown);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
