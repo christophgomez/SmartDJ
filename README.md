@@ -304,6 +304,39 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Success Response Object</td>
   </tr>
   <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/shuffle</td>
+    <td>Toggle shuffle on the Primary Account's Playback</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  shuffle:Boolean
+}</pre>
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/repeat</td>
+    <td>Toggle repeat on the Primary Account's Playback</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  type:String
+}</pre>(type must be: 'track', 'context', or 'off')
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/volume</td>
+    <td>Set the volume on the Primary Account's Playback</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  volumePercent:Number
+}</pre>(volumePercent must be an number from 0 to 100)
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
     <td>GET</td>
     <td>/spotify/user/:token</td>
     <td>Get a Spotify User Profile</td>
@@ -314,7 +347,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
       <pre lang='js'>
  {
   success: true,
-  fullProfileResponse:{},
+  fullProfileResponse: {},
   birthday:String,
   name:String,
   email:String,

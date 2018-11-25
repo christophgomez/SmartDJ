@@ -41,7 +41,7 @@
 				<li class='button'><b-button @click='currentlyPlaying()'>Get Currently Playing Track</b-button></li>
 				<li class='button'><b-button @click='getTopArtists()'>Get Top Artists</b-button></li>
 				<li class='button'><b-btn @click='getDevices()'>Get Devices</b-btn></li>
-				<li class='button'><b-btn>Get Current Track Info</b-btn></li>
+				<li class='button'><b-btn>Get Current Playback Info</b-btn></li>
 				<br>
 				<br>
 				<li class='button'><b-button @click='player()'>Start Web Player</b-button></li>
