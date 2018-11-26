@@ -128,17 +128,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Success Response Object</td>
   </tr>
   <tr>
-    <td>POST</td>
-    <td>/spotify/test</td>
-    <td>Send Test Data to the Server</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  data:String,
-}</pre>
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
     <td>GET</td>
     <td>/spotify/login</td>
     <td>Get a Spotify Login/Auth Page</td>
@@ -150,18 +139,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   redirect:String 
 }</pre>
     </td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/authorize</td>
-    <td>Receive a Spotify Access Token From the Spotify Servers</td>
-    <td>Request Body Data:
-      <pre lang='js'>
-{ 
-  code:String
-}</pre>
-    </td>
-    <td>Success Response Object</td>
   </tr>
   <tr>
     <td>GET</td>
@@ -178,33 +155,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     </td>
   </tr>
   <tr>
-    <td>POST</td>
-    <td>/spotify/access_token/primary</td>
-    <td>Update the System Primary Token</td>
-    <td>Request Body Data:
-      <pre lang='js'>
-{
-  access_token:String,
-  refresh_token:String
-}</pre>
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>DELETE</td>
-    <td>/spotify/access_token/primary</td>
-    <td>Delete the System Primary Token</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/access_token/primary/refresh</td>
-    <td>Refresh the System Primary Token</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
     <td>GET</td>
     <td>/spotify/access_token/temp</td>
     <td>Get the System temporary Token</td>
@@ -219,6 +169,37 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     </td>
   </tr>
   <tr>
+    <td>GET</td>
+    <td>/spotify/kinect/devices</td>
+    <td>Get the Primary Account's Active Devices</td>
+    <td>None</td>
+    <td>Success Response Object
+      <pre lang='js'>
+{
+  success: true,
+  devices: [{}]
+}</pre></td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/spotify/kinect/currently_playing</td>
+    <td>Get Information about what the Primary Account's currently playing</td>
+    <td>None</td>
+    <td>Success Response Object
+      <pre lang='js'>
+{
+  success: true,
+  devices: [{}]
+}</pre></td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/spotify/access_token/primary</td>
+    <td>Delete the System Primary Token</td>
+    <td>None</td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
     <td>DELETE</td>
     <td>/spotify/access_token/temp</td>
     <td>Delete the System temporary Token</td>
@@ -227,15 +208,51 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   </tr>
   <tr>
     <td>POST</td>
-    <td>/spotify/kinect/player</td>
-    <td>Start the System WebPlayer</td>
+    <td>/spotify/test</td>
+    <td>Send Test Data to the Server</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  data:String,
+}</pre>
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/spotify/authorize</td>
+    <td>Receive a Spotify Access Token From the Spotify Servers</td>
+    <td>Request Body Data:
+      <pre lang='js'>
+{ 
+  code:String
+}</pre>
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/spotify/access_token/primary</td>
+    <td>Update the System Primary Token</td>
+    <td>Request Body Data:
+      <pre lang='js'>
+{
+  access_token:String,
+  refresh_token:String
+}</pre>
+    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/spotify/access_token/primary/refresh</td>
+    <td>Refresh the System Primary Token</td>
     <td>None</td>
     <td>Success Response Object</td>
   </tr>
   <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/transfer</td>
-    <td>Transfer the Primary Account's Current Playback to the System</td>
+    <td>POST</td>
+    <td>/spotify/kinect/player</td>
+    <td>Start the System WebPlayer</td>
     <td>None</td>
     <td>Success Response Object</td>
   </tr>
@@ -251,29 +268,25 @@ Request Body data should be formatted as a JSON Object as well, with exact param
      <td>Success Response object</td>
   </tr>
   <tr>
-    <td>GET</td>
-    <td>/spotify/kinect/devices</td>
-    <td>Get the Primary Account's Active Devices</td>
+    <td>POST</td>
+    <td>/spotify/kinect/next</td>
+    <td>Skip to Primary Account's next track</td>
     <td>None</td>
-    <td>Success Response Object
-      <pre lang='js'>
-{
-  success: true,
-  devices: [{}]
-}</pre>
-    </td>
+    <td>Success Response Object</td>
+  </tr>
   <tr>
-    <td>GET</td>
-    <td>/spotify/kinect/currently_playing</td>
-    <td>Get Information about what the Primary Account's currently playing</td>
+    <td>POST</td>
+    <td>/spotify/kinect/prev</td>
+    <td>Skip to Primary Account's previoius track</td>
     <td>None</td>
-    <td>Success Response Object
-      <pre lang='js'>
-{
-  success: true,
-  devices: [{}]
-}</pre>
-    </td>
+    <td>Success Response Object</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/spotify/kinect/transfer</td>
+    <td>Transfer the Primary Account's Current Playback to the System</td>
+    <td>None</td>
+    <td>Success Response Object</td>
   </tr>
   <tr>
     <td>PUT</td>
@@ -286,20 +299,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>PUT</td>
     <td>/spotify/kinect/pause</td>
     <td>Pause the Primary Account's current playback</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/next</td>
-    <td>Skip to Primary Account's next track</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/prev</td>
-    <td>Skip to Primary Account's previoius track</td>
     <td>None</td>
     <td>Success Response Object</td>
   </tr>
