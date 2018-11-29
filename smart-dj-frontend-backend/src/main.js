@@ -31,6 +31,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueWait from 'vue-wait'
 Vue.use(VueWait);
 
+import VueGoogleCharts from 'vue-google-charts'
+Vue.use(VueGoogleCharts)
+
 Vue.use(new VueSocketIO({
   connection: config.baseURL+config.serverPort,
 }));

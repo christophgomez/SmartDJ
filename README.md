@@ -263,7 +263,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Request Body Data: <br>(The ID of the device to transfer too)
       <pre lang='js'>
 {
-  id: String
+  id:String
 }</pre></td>
      <td>Success Response object</td>
   </tr>
@@ -271,14 +271,24 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>POST</td>
     <td>/spotify/kinect/next</td>
     <td>Skip to Primary Account's next track</td>
-    <td>None</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  from:String,
+  timestamp:Number,
+}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
+    </td>
     <td>Success Response Object</td>
   </tr>
   <tr>
     <td>POST</td>
     <td>/spotify/kinect/prev</td>
     <td>Skip to Primary Account's previoius track</td>
-    <td>None</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  from:String,
+  timestamp:Number,
+}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
+    </td>
     <td>Success Response Object</td>
   </tr>
   <tr>
@@ -292,14 +302,24 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>PUT</td>
     <td>/spotify/kinect/play</td>
     <td>Play the Primary Account's current playback</td>
-    <td>None</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  from:String,
+  timestamp:Number,
+}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
+    </td>
     <td>Success Response Object</td>
   </tr>
   <tr>
     <td>PUT</td>
     <td>/spotify/kinect/pause</td>
     <td>Pause the Primary Account's current playback</td>
-    <td>None</td>
+    <td>Request Body Data:<pre lang='js'>
+{
+  from:String,
+  timestamp:Number,
+}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
+    </td>
     <td>Success Response Object</td>
   </tr>
   <tr>
@@ -308,9 +328,10 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Toggle shuffle on the Primary Account's Playback</td>
     <td>Request Body Data:<pre lang='js'>
 {
-  shuffle:Boolean
-}</pre>
-    </td>
+  shuffle:Boolean,
+  from:String,
+  timestamp:Number
+}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.</td>
     <td>Success Response Object</td>
   </tr>
   <tr>
@@ -319,8 +340,10 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Toggle repeat on the Primary Account's Playback</td>
     <td>Request Body Data:<pre lang='js'>
 {
-  type:String
-}</pre>(type must be: 'track', 'context', or 'off')
+  type:String,
+  from:String,
+  timestamp:Number
+}</pre>type must be: 'track', 'context', or 'off', from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
     </td>
     <td>Success Response Object</td>
   </tr>
@@ -330,8 +353,10 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>Set the volume on the Primary Account's Playback</td>
     <td>Request Body Data:<pre lang='js'>
 {
-  volumePercent:Number
-}</pre>(volumePercent must be an number from 0 to 100)
+  volumePercent:Number,
+  from:String,
+  timestamp:Number
+}</pre>volumePercent must be an number from 0 to 100, from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
     </td>
     <td>Success Response Object</td>
   </tr>

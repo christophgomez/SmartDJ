@@ -4,6 +4,6 @@ const config = require('../../config/settings');
 
 export default () => {
 	return axios.create({
-		baseURL: config.baseURL+config.serverPort+'/spotify',
+		baseURL: config.baseURL + config.serverPort + '/analytics',
 	});
 };
