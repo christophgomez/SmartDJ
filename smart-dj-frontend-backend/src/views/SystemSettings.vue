@@ -24,6 +24,10 @@
 						</md-list-item>
 
 						<md-list-item>
+							<b-btn :variant="'link'" class='md-list-item-text' @click="setActive('analytics')">Analytics</b-btn>
+						</md-list-item>
+
+						<md-list-item>
 							<b-button :variant="'link'" class='md-list-item-text' @click="setActive('other')">Other Settings</b-button>
 						</md-list-item>
         			</md-list>
@@ -118,7 +122,7 @@
 										</b-button-group>
 									</b-button-toolbar>
 									<br>
-									<font-awesome-icon icon='volume-down' size='2x'/><input class='slider' style='width:50%; margin-left:10px;margin-right:10px;' type="range" v-model.number='volume' v-on:input='setVolume(volume)'><font-awesome-icon icon='volume-up' size='2x'/>
+									<font-awesome-icon icon='volume-down' size='2x'/><input class='slider' style='width:50%; margin-left:10px;margin-right:10px;' type="range" v-model.number='volume' min="0" max="100" @change='setVolume(volume)'><font-awesome-icon icon='volume-up' size='2x'/>
 								</b-col>
 								<b-col>
 									
@@ -147,9 +151,38 @@
       					</md-table-row>
     					</md-table>
        			</div>
+
+					 <div v-if='onAnalytics === true'>
+						 <div v-if='analyticsLoaded'>
+						 	Total Amount of Requests: {{analyticsCount}}
+						 	<hr>
+							 <p style='text-align:left'>Requests per {{lineType}}</p>
+							 <GChart type='LineChart' :data="lineData" :options="lineOptions"/>
+							 <b-button-toolbar aria-label="Toolbar with button groups">
+							 	<b-button-group class='mx-1'>
+								 	<b-btn @click='getLineAllRequestsByYear()' class='playbackControls'>Year</b-btn>
+									<b-btn @click='getLineAllRequestsByMonth()' class='playbackControls'>Month</b-btn> 
+								 	<b-btn @click='getLineAllRequestsByCurrentWeek()' class='playbackControls'>Week</b-btn>
+									 <b-btn @click='getLineAllRequestsByCurrentDay()' class='playbackControls'>Day</b-btn>
+								 </b-button-group>
+							 </b-button-toolbar>
+							 <hr>
+							 <p style='text-align:left'>Total Requests per Endpoint</p>
+							 <GChart type="ColumnChart" :data="barData" :options="barOptions"/>
+							 <hr>
+							 <p style='text-align:left'>Request Origin Breakdown</p>
+							 <GChart type='PieChart' :data="pieData" :options="pieOptions"/>
+							 <hr>
+							 <p style='text-align:left'>Execution Time per Request</p>
+							 <GChart type='Timeline' :data="timeData" :options="timeOptions" :settings="{ packages: ['timeline'] }"/>
+							 <hr>
+							 <p style='text-align:left'>Listening Sessions</p>
+							 <GChart type='Timeline' :data="sessionData" :options="sessionOptions" :settings="{ packages: ['timeline'] }"/>
+						 </div>
+					 </div>
      			</md-app-content>
     		</md-app>
-		</v-wait>
+		
 		<b-modal id='account-select' title='Select an Account' hide-footer centered lazy>
 			<md-table v-model="users" md-sort="username" md-sort-order="asc" @md-selected='changeActiveToken'>
       		<md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single">
@@ -161,12 +194,14 @@
       		</md-table-row>
     		</md-table>
 		</b-modal>
+		</v-wait>
 	</div>
 </template>
 
 <script>
 import UserService from '@/services/UserService';
 import SpotifyService from '@/services/SpotifyService';
+import AnalyticsService from '@/services/AnalyticsService';
 
 export default {
 	name: 'SystemSettings',
@@ -175,6 +210,52 @@ export default {
 			onUsers: false,
 			onOtherSettings: false,
 			onSpotify: true,
+			onAnalytics: false,
+			analyticsLoaded: false,
+			analyticsCount: Number,
+			barOptions: {
+				animation: {
+    				duration: 1000,
+    				easing: "out"
+				},
+				colors: ['#42b983', '#b95242'],
+			},
+			barData:[],
+			pieOptions: {
+				animation: {
+    				duration: 1000,
+    				easing: "out"
+				},
+				colors: ['#42b983', '#b95242'],
+			},
+			pieData: [],
+			lineData:[],
+			lineType:'Month',
+			lineOptions: {
+				animation: {
+    				duration: 1000,
+    				easing: "out"
+				},
+				colors: ['#42b983', '#b95242'],
+			},
+			timeData: [],
+			timeOptions: {
+				animation: {
+    				duration: 1000,
+    				easing: "out"
+				},
+				colors: ['#42b983'],
+				height: 350,
+			},
+			sessionData: [],
+			sessionOptions: {
+				animation: {
+    				duration: 1000,
+    				easing: "out"
+				},
+				colors: ['#42b983'],
+				height: 350,
+			},
 			title: 'Spotify',
 			users: [],
 			access_token: '',
@@ -202,6 +283,7 @@ export default {
 		});
 	},
 	created() {
+		this.$wait.start('api');
 		this.authWindow = window;
 		var self = this;
 		this.authWindow.checkTempToken = function() {
@@ -211,9 +293,14 @@ export default {
 		this.getCurrentlyPlaying();
 		this.getPrimaryDevices();
 		this.getUsers();
+		this.$wait.end('api');
 		setInterval(() => {
 			this.getPrimaryAccount();
 		}, 900000);
+		Date.prototype.getWeek = function(){
+   		var firstDay = new Date(this.getFullYear(), this.getMonth(), 1).getDay();
+    		return Math.ceil((this.getDate() + firstDay)/7);
+    	};
 	},
 	sockets: {
 		stateChanged: function (state) {
@@ -221,7 +308,6 @@ export default {
 			this.artist = state.track_window.current_track.artists[0].name;
 			this.album = state.track_window.current_track.album.name;
 			this.artist = this.artist + " | " + this.album;
-			console.log(state.paused);
 			this.paused = state.paused;
 			this.getPrimaryDevices();
 		}
@@ -234,6 +320,8 @@ export default {
 					this.onUsers = false;
 					this.onOtherSettings = false;
 					this.title = 'Spotify';
+					this.analyticsLoaded = false;
+					this.onAnalytics = false;
 					break;
 				case 'users':
 					this.getUsers();
@@ -241,12 +329,25 @@ export default {
 					this.onUsers = true;
 					this.onOtherSettings = false;
 					this.title = 'Users';
+					this.analyticsLoaded = false;
+					this.onAnalytics = false;
 					break;
 				case 'other':
 					this.onSpotify = false;
 					this.onUsers = false;
 					this.onOtherSettings = true;
-					this.title = 'Other Settings'
+					this.title = 'Other Settings';
+					this.analyticsLoaded = false;
+					this.onAnalytics = false;
+					break;
+				case 'analytics':
+					this.getAnalyticsCount();
+					this.getAnalytics();
+					this.onSpotify = false;
+					this.onUsers = false;
+					this.onOtherSettings = false;
+					this.onAnalytics = true;
+					this.title= 'Analytics';
 					break;
 				}
 			},
@@ -296,9 +397,7 @@ export default {
 			 }
 		 },
 		 async getUsers() {
-			 this.$wait.start('api');
 			 const response = await UserService.fetchUsers();
-			 this.$wait.end('api');
 			 if(response.data.success === true) {
 				 this.users = response.data.users;
 			 } else {
@@ -320,9 +419,7 @@ export default {
 			 	this.getUsers();
 		 },
 		 async getPrimaryAccount() {
-			 this.$wait.start('api');
 			 const response = await SpotifyService.getPrimaryToken();
-			 this.$wait.end('api');
 			 if(response.data.success === true) {
 				 this.access_token = response.data.access_token;
 				 const profileResponse = await SpotifyService.getUserProfile(this.access_token);
@@ -332,28 +429,27 @@ export default {
 				 this.tokenExists = true;
 			 } else {
 				 this.tokenExists = false;
-				 console.log('Could not get primary token');
 			 }
 		 },
 		async play() {
-			const response = await SpotifyService.playPrimary();
+			const response = await SpotifyService.playPrimary({from: 'App', timestamp: Date.now()});
 			if(response.data.success === true)
 				this.paused = false;
 		},
 		async pause() {
-			const response = await SpotifyService.pausePrimary();
+			const response = await SpotifyService.pausePrimary({from: 'App', timestamp: Date.now()});
 			if(response.data.success === true)
 				this.paused = true;
 		},
 		async next() {
-			await SpotifyService.nextPrimaryTrack();
+			await SpotifyService.nextPrimaryTrack({from: 'App', timestamp: Date.now()});
 			var self = this;
 			setTimeout(() => {
 				self.getCurrentlyPlaying();
 			}, 250); 
 		},
 		async prev() {
-			await SpotifyService.previousPrimaryTrack();
+			await SpotifyService.previousPrimaryTrack({from: 'App', timestamp: Date.now()});
 			var self = this;
 			setTimeout(() => {
 				self.getCurrentlyPlaying();
@@ -361,12 +457,12 @@ export default {
 		},
 		async toggleShuffle() {
 			if(this.shuffle === false) {
-				const response = await SpotifyService.shufflePrimary({shuffle: true});
+				const response = await SpotifyService.shufflePrimary({shuffle: true, from: 'App', timestamp: Date.now()});
 				if(response.data.success === true) {
 					this.shuffle = true;
 				}
 			} else {
-				const response = await SpotifyService.shufflePrimary({shuffle: false});
+				const response = await SpotifyService.shufflePrimary({shuffle: false, from: 'App', timestamp: Date.now()});
 				if(response.data.success === true) {
 					this.shuffle = false;
 				}
@@ -375,19 +471,19 @@ export default {
 		async toggleRepeat() {
 			switch(this.repeatToggle) {
 				case 1:
-					const response = await SpotifyService.repeatPrimary({type: 'track'});
+					const response = await SpotifyService.repeatPrimary({type: 'track', from: 'App', timestamp: Date.now()});
 					if(response.data.success === true) {
 						this.repeatToggle = 2;
 					}
 					break;
 				case 2:
-					const response2 = await SpotifyService.repeatPrimary({type: 'context'});
+					const response2 = await SpotifyService.repeatPrimary({type: 'context', from: 'App', timestamp: Date.now()});
 					if(response2.data.success === true) {
 						this.repeatToggle = 3;
 					}
 					break;
 				case 3: 
-					const response3 = await SpotifyService.repeatPrimary({type: 'off'});
+					const response3 = await SpotifyService.repeatPrimary({type: 'off', from: 'App', timestamp: Date.now()});
 					if(response3.data.success === true) {
 						this.repeatToggle = 1;
 					}
@@ -395,7 +491,7 @@ export default {
 			}
 		},
 		async setVolume(volume) {
-			await SpotifyService.setPrimaryVolume({volumePercent: volume});
+			await SpotifyService.setPrimaryVolume({volumePercent: volume, from: 'App', timestamp: Date.now()});
 		},
 		async player() {
 			await SpotifyService.startPlayer();
@@ -425,9 +521,223 @@ export default {
 			const response = await SpotifyService.getPrimaryDevices();
 			if(response.data.success) {
 				this.primaryDevices = response.data.devices;
-				console.log(this.primaryDevices);
 			}
-		}
+		},
+		async getAnalyticsCount() {
+			this.$wait.start('api');
+			const response = await AnalyticsService.getCount();
+			if(response.data.success === true){
+				this.analyticsCount = response.data.count;
+			}
+			this.$wait.end('api');
+		},
+		async getAnalytics() {
+			this.$wait.start('api');
+			this.getTotalBarCount();
+			this.getPieTotalBreakdown();
+			this.getLineAllRequestsByYear();
+			this.getSessions();
+			this.getExecutionTime();
+			this.analyticsLoaded = true;
+			this.$wait.end('api');
+		},
+		async getTotalBarCount() {
+			var endpoints = ['play', 'pause', 'next', 'prev', 'shuffle', 'repeat', 'volume'];
+			var b_data = [['Endpoint', 'Count']];
+			for(var i = 0; i < endpoints.length; i++) {
+				const response = await AnalyticsService.getEndpoint(endpoints[i]);
+				if(response.data.success === true) {
+					var tmp_data = [endpoints[i]];
+					tmp_data.push(response.data.data.length);
+				}
+				b_data.push(tmp_data);
+			}
+			this.barData = b_data;
+		},
+		async getPieTotalBreakdown() {
+			var p_data = [['Request Origin', 'Amount of Requests']];
+			const app_response = await AnalyticsService.getApp();
+			if(app_response.data.success) {
+				let tmp_data = ['App', app_response.data.data.length];
+				p_data.push(tmp_data);
+			}
+			const kinect_response = await AnalyticsService.getKinect();
+			if(kinect_response.data.success) {
+				let tmp_data = ['Kinect', kinect_response.data.data.length];
+				p_data.push(tmp_data);
+			}
+			this.pieData = p_data;
+		},
+		async getLineAllRequestsByYear() {
+			var l_data = [["Date", "Total"]];
+			const curr_year = new Date().getFullYear();
+			const response = await AnalyticsService.getYear(curr_year);
+			if(response.data.success) {
+				var temp_data = [];
+				var t_data = response.data.data;
+				var results = {}, date;
+				for(let i = 0; i < t_data.length; i++) {
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth()];
+					results[date] = results[date] || 0;
+  					results[date]++;
+				}
+				//console.log(results);
+				var resultMonths = Object.keys(results);
+				//console.log('keys: '+resultMonths);
+				for(let i = 0; i < 12; i++) {
+					let date = new Date(curr_year, i);
+					//console.log(date.getFullYear() +","+date.getMonth())
+					for(let j = 0; j < resultMonths.length; j++) {
+						if(date.getFullYear() +","+date.getMonth() === resultMonths[j]) {
+							temp_data = [date, results[resultMonths[j]]];
+							l_data.push(temp_data);
+						} else {
+							temp_data = [date, 0];
+							l_data.push(temp_data);
+						}
+					}
+				}
+				this.lineType = 'Current Year';
+				this.lineData = l_data;
+			}
+		},
+		async getLineAllRequestsByMonth() {
+			var l_data = [["Date", "Total"]];
+			const curr_year = new Date().getFullYear();
+			const curr_month = new Date().getMonth();
+			const curr_day = new Date().getDate();
+			const response = await AnalyticsService.getMonth(curr_year, curr_month);
+			if(response.data.success) {
+				var temp_data = [];
+				var t_data = response.data.data;
+				var results = {}, date;
+				for(let i = 0; i < t_data.length; i++) {
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(), new Date(t_data[i].time.created).getWeek()];
+					results[date] = results[date] || 0;
+  					results[date]++;
+				}
+				//console.log(results);
+				var resultWeeks = Object.keys(results);
+				//console.log('keys: '+resultWeeks);
+				for(let i = curr_day-28; i <= curr_day+1; i+=7) {
+					let date = new Date(curr_year, curr_month, i);
+					//console.log(date.getFullYear() +","+date.getMonth()+","+date.getWeek());
+					for(let j = 0; j < resultWeeks.length; j++) {
+						if(date.getFullYear() +","+date.getMonth()+","+date.getWeek() === resultWeeks[j]) {
+							temp_data = [date, results[resultWeeks[j]]];
+							l_data.push(temp_data);
+						} else {
+							temp_data = [date, 0];
+							l_data.push(temp_data);
+						}
+					}
+				}
+				this.lineType = 'Past Month';
+				this.lineData = l_data;
+			}
+		},
+		async getLineAllRequestsByCurrentWeek() {
+			var l_data = [["Date", "Total"]];
+			const curr_year = new Date().getFullYear();
+			const curr_month = new Date().getMonth();
+			const curr_date = new Date().getDate();
+			const response = await AnalyticsService.getWeek(curr_year, curr_month, curr_date);
+			if(response.data.success) {
+				var temp_data = [];
+				var t_data = response.data.data;
+				var results = {}, date;
+				for(let i = 0; i < t_data.length; i++) {
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(),new Date(t_data[i].time.created).getDate()];
+					results[date] = results[date] || 0;
+  					results[date]++;
+				}
+				console.log(results);
+				var resultDays = Object.keys(results);
+				console.log('keys: '+resultDays)
+				for(let i = curr_date - 6; i <= curr_date; i++) {
+					let date = new Date(curr_year, curr_month, i);
+					console.log(date.getFullYear() +","+date.getMonth() +","+date.getDate())
+					for(let j = 0; j < resultDays.length; j++) {
+						if(date.getFullYear() +","+date.getMonth() +","+date.getDate()=== resultDays[j]) {
+							temp_data = [date, results[resultDays[j]]];
+							l_data.push(temp_data);
+						} else {
+							temp_data = [date, 0];
+							l_data.push(temp_data);
+						}
+					}
+				}
+				this.lineType='Past Week';
+				this.lineData = l_data;
+			}
+		},
+		async getLineAllRequestsByCurrentDay() {
+			var l_data = [["Date", "Total"]];
+			const curr_year = new Date().getFullYear();
+			const curr_month = new Date().getMonth();
+			const curr_date = new Date().getDate();
+			const curr_hours = new Date().getHours();
+			const response = await AnalyticsService.getDay(curr_year, curr_month, curr_date);
+			if(response.data.success) {
+				var temp_data = [];
+				var t_data = response.data.data;
+				var results = {}, date;
+				for(let i = 0; i < t_data.length; i++) {
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(),new Date(t_data[i].time.created).getDate(), new Date(t_data[i].time.created).getHours()];
+					results[date] = results[date] || 0;
+  					results[date]++;
+				}
+				//console.log(results);
+				var resultDays = Object.keys(results);
+				//console.log(resultDays);
+				for(let i = curr_hours - 24; i <= curr_hours; i++) {
+					let date = new Date(curr_year, curr_month, curr_date, i);
+					//console.log(date.getFullYear() +","+date.getMonth() +","+date.getDate()+","+date.getHours())
+					for(let j = 0; j < resultDays.length; j++) {
+						if(date.getFullYear() +","+date.getMonth() +","+date.getDate()+","+date.getHours()=== resultDays[j]) {
+							const count = results[resultDays[j]];
+							//console.log('MATCH @ DATE: '+date+', placing count: '+count);
+							temp_data = [date, count];
+							l_data.push(temp_data);
+						} else {
+							temp_data = [date, 0];
+							l_data.push(temp_data);
+						}
+					}
+				}
+				this.lineType='Past Day';
+				this.lineData = l_data;
+			}
+		},
+		async getSessions() {
+			var s_data = [['Day', 'Start', 'End']];
+			const response = await AnalyticsService.getSessions();
+			if(response.data.success) {
+				var curr_year = new Date().getYear();
+				var curr_month = new Date().getMonth();
+				var curr_date = new Date().getDate();
+				var temp_data = [];
+				for(let i = 0; i < response.data.data.length; i++) {
+					//let date = new Date(curr_year, curr_month, i);
+					temp_data = ['Session '+(i+1), new Date(response.data.data[i].createdAt), new Date(response.data.data[i].endedAt)];
+					s_data.push(temp_data);
+				}
+				console.log(s_data);
+				this.sessionData = s_data;
+			}
+		},
+		async getExecutionTime() {
+			var e_data = [["Request", "Start", "End"]];
+			const response = await AnalyticsService.getAll();
+			if(response.data.success) {
+				var temp_data = [];
+				for(let i = 0; i < response.data.data.length; i++) {
+					let td = [response.data.data[i].endpoint, (response.data.data[i].time.created),(response.data.data[i].time.executed)];
+					e_data.push(td);
+				}
+				this.timeData = e_data;
+			}
+		},
 	}
 }
 </script>
@@ -471,6 +781,14 @@ export default {
 		background-color:#42b983;
 		border:#42b983;
 		margin-top:10px;
+	}
+	.playbackControls:active {
+		outline-color: none;
+		border: none;
+	}
+	.invertedPlaybackControls:active {
+		outline-color: none;
+		border: none;
 	}
 	.invertedPlaybackControls {
 		color: #42b983;

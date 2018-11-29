@@ -60,6 +60,8 @@ db.once('open', function (callback) {
 	app.use('/spotify', spotifyRoutes);
 	const userRoutes = require('./expressRoutes/userRoutes.js');
 	app.use('/users', userRoutes);
+	const analyticRoutes = require('./expressRoutes/analyticRoutes.js');
+	app.use('/analytics', analyticRoutes);
 
 	var port = config.serverPort;
 

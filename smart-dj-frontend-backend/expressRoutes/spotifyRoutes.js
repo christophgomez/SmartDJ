@@ -6,6 +6,8 @@ const Token = require('../models/token');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 const config = require('../config/settings');
+const Request = require('../models/request');
+const Session = require('../models/listeningSession');
 
 module.exports = function (app, io) {
 	var spotifyRoute = express.Router();
@@ -17,6 +19,7 @@ module.exports = function (app, io) {
 	var temp_access_token;
 	var temp_refresh_token;
 	var kinect_id;
+	var sessionBegan = false;
 
 	/***********************************SOCKET**********************************************/
 
@@ -36,9 +39,55 @@ module.exports = function (app, io) {
 		});
 		
 		socket.on('stateChanged', (data) => {
-			socket.broadcast.emit('stateChanged', data.state);
+			if (data.state !== null) {
+				socket.broadcast.emit('stateChanged', data.state);
+				if (data.state.paused === false) {
+					if (sessionBegan === false) {
+						var new_session = new Session({
+							createdAt: Date.now(),
+							endedAt: Date.now()
+						});
+						new_session.save((err) => {
+							if (err) {
+								console.log(err);
+							}
+						});
+						sessionBegan = true;
+					}
+				}
+				if (data.state.paused === true) {
+					if (sessionBegan === true) {
+						Session.findOne({}, {}, { sort: { 'createdAt': -1 } }, (err, session) => {
+							if (err) {
+								console.log(err)
+							}
+							session.endedAt = Date.now();
+							session.save((err) => {
+								if (err) console.log(err);
+								sessionBegan = false;
+							});
+						});
+					}
+				}
+			} else {
+				if (sessionBegan === true) {
+					Session.findOne({}, {}, {
+						sort: {
+							'createdAt': -1
+						}
+					}, (err, session) => {
+						if (err) {
+							console.log(err)
+						}
+						session.endedAt = Date.now();
+						session.save((err) => {
+							if (err) console.log(err);
+							sessionBegan = false;
+						});
+					});
+				}
+			}
 		});
-
 	});
 
 	setInterval(() => {
@@ -339,31 +388,150 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/play').put((req, res) => {
-		return play(primary_access_token, res);
+		var received = Date.now();
+		play(primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'play',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	})
 
 	spotifyRoute.route('/kinect/pause').put((req, res) => {
-		return pause(primary_access_token, res);
+		var received = Date.now();
+		pause(primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'pause',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	})
 	
 	spotifyRoute.route('/kinect/next').post((req, res) => {
-		return next(primary_access_token, res);
+		var received = Date.now();
+		next(primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'next',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	});
 
 	spotifyRoute.route('/kinect/prev').post((req, res) => {
-		return prev(primary_access_token, res);
+		var received = Date.now();
+		prev(primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'prev',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	});
 
 	spotifyRoute.route('/kinect/shuffle').put((req, res) => {
-		return shuffle(req.body.shuffle, primary_access_token, res);
+		var received = Date.now();
+		shuffle(req.body.shuffle, primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'shuffle',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	});
 
 	spotifyRoute.route('/kinect/repeat').put((req, res) => {
-		return repeat(req.body.type, primary_access_token, res);
+		var received = Date.now();
+		repeat(req.body.type, primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'repeat',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	});
 
 	spotifyRoute.route('/kinect/volume').put((req, res) => {
-		return setVolume(req.body.volumePercent, primary_access_token, res);
+		var received = Date.now();
+		setVolume(req.body.volumePercent, primary_access_token, res);
+		var executed = Date.now();
+		var new_request = new Request({
+			from: req.body.from,
+			endpoint: 'volume',
+			time: {
+				created: req.body.timestamp,
+				received: received,
+				executed: executed,
+			}
+		});
+		new_request.save((error) => {
+			if (error) {
+				console.log(error);
+				return;
+			}
+		});
 	})
 
 	spotifyRoute.route('/user/:token').get((req, res) => {

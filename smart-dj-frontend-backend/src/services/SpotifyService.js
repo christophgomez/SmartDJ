@@ -43,14 +43,14 @@ export default {
 	startPlayer() {
 		return Api().post('/kinect/player');
 	},
-	playPrimary() {
-		return Api().put('/kinect/play');
+	playPrimary(params) {
+		return Api().put('/kinect/play', params);
 	},
 	playUser(params) {
 		return Api().put('/user/play', params);
 	},
-	pausePrimary() {
-		return Api().put('/kinect/pause');
+	pausePrimary(params) {
+		return Api().put('/kinect/pause', params);
 	},
 	pauseUser(params) {
 		return Api().put('/user/pause', params);
@@ -61,11 +61,11 @@ export default {
 	previousUserTrack(params) {
 		return Api().post('/user/prev', params);
 	},
-	nextPrimaryTrack() {
-		return Api().post('/kinect/next');
+	nextPrimaryTrack(params) {
+		return Api().post('/kinect/next', params);
 	},
-	previousPrimaryTrack() {
-		return Api().post('/kinect/prev');
+	previousPrimaryTrack(params) {
+		return Api().post('/kinect/prev', params);
 	},
 	getUserProfile(token) {
 		return Api().get(`/user/${token}`);

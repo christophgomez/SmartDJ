@@ -70,6 +70,7 @@
 
           // Playback status updates
           this.player.addListener('player_state_changed', state => {
+            console.log(state);
             socket.emit('stateChanged', {state});
           });
 
