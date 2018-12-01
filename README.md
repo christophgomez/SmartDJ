@@ -39,7 +39,7 @@ const api = axios.create({
 
 Move `smart-dj-frontend-backend/webplayer.html` to the C drive
 
-In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line 291:
+In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line:
 
 ```js
 exec('open -a "Google Chrome" ./webPlayer.html', () => {
