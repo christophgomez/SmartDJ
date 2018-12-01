@@ -20,6 +20,7 @@ module.exports = function (app, io) {
 	var temp_refresh_token;
 	var kinect_id;
 	var sessionBegan = false;
+	var onSecondReq = false;
 
 	/***********************************SOCKET**********************************************/
 
@@ -106,8 +107,18 @@ module.exports = function (app, io) {
 
 	spotifyRoute.route('/test').post((req, res) => {
 		console.log('server received test POST, checking data');
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		if (req.body.data) {
-			console.log('Data: ' + req.body.data);
+			console.log('data: ' + req.body.data);
 			return res.send({
 				success: true
 			});
@@ -388,6 +399,16 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/play').put((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		play(primary_access_token, res);
 		var executed = Date.now();
@@ -409,6 +430,16 @@ module.exports = function (app, io) {
 	})
 
 	spotifyRoute.route('/kinect/pause').put((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		pause(primary_access_token, res);
 		var executed = Date.now();
@@ -430,6 +461,16 @@ module.exports = function (app, io) {
 	})
 	
 	spotifyRoute.route('/kinect/next').post((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		next(primary_access_token, res);
 		var executed = Date.now();
@@ -451,6 +492,16 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/prev').post((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		prev(primary_access_token, res);
 		var executed = Date.now();
@@ -472,6 +523,16 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/shuffle').put((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		shuffle(req.body.shuffle, primary_access_token, res);
 		var executed = Date.now();
@@ -493,6 +554,16 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/repeat').put((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		repeat(req.body.type, primary_access_token, res);
 		var executed = Date.now();
@@ -514,6 +585,16 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/volume').put((req, res) => {
+		if (req.body.from === 'Kinect') {
+			if (onSecondReq === false) {
+				console.log('First kinect request');
+				onSecondReq = true;
+				return;
+			} else {
+				onSecondReq = false;
+				console.log('Received 2nd request from kinect');
+			}
+		}
 		var received = Date.now();
 		setVolume(req.body.volumePercent, primary_access_token, res);
 		var executed = Date.now();
