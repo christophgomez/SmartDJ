@@ -461,7 +461,7 @@ module.exports = function (app, io) {
 	})
 	
 	spotifyRoute.route('/kinect/next').post((req, res) => {
-		if (req.body.from === 'Kinect') {
+		/*if (req.body.from === 'Kinect') {
 			if (onSecondReq === false) {
 				console.log('First kinect request');
 				onSecondReq = true;
@@ -470,7 +470,7 @@ module.exports = function (app, io) {
 				onSecondReq = false;
 				console.log('Received 2nd request from kinect');
 			}
-		}
+		}*/
 		var received = Date.now();
 		next(primary_access_token, res);
 		var executed = Date.now();
@@ -492,7 +492,7 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/prev').post((req, res) => {
-		if (req.body.from === 'Kinect') {
+		/*if (req.body.from === 'Kinect') {
 			if (onSecondReq === false) {
 				console.log('First kinect request');
 				onSecondReq = true;
@@ -501,7 +501,7 @@ module.exports = function (app, io) {
 				onSecondReq = false;
 				console.log('Received 2nd request from kinect');
 			}
-		}
+		}*/
 		var received = Date.now();
 		prev(primary_access_token, res);
 		var executed = Date.now();
