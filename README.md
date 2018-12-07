@@ -85,7 +85,7 @@ npm run server
 npm run serve
 ```
 
-## Spotify API Routes
+## API Routes
 
 All requests should be sent to the base server address (`http://localhost:8081`)
 
