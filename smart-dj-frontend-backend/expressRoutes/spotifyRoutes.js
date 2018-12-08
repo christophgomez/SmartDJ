@@ -13,7 +13,7 @@ module.exports = function (app, io) {
 	var spotifyRoute = express.Router();
 	const my_client_id = config.spotifyClientId;
 	const my_client_secret = config.spotifyClientSecret;
-	const redirect_uri = config.baseURL + config.port + "/success";
+	const redirect_uri = config.baseURL + config.clientPort + "/success";
 	var primary_access_token = app.get('primary_access_token');
 	var primary_refresh_token = app.get('primary_refresh_token');
 	var temp_access_token;

@@ -65,7 +65,7 @@ db.once('open', function (callback) {
 	const analyticRoutes = require('./expressRoutes/analyticRoutes.js');
 	app.use('/analytics', analyticRoutes);
 
-	// Middleware for serving '/dist' directory
+	/*// Middleware for serving '/dist' directory
 	const staticFileMiddleware = express.static('dist');
 
 	// 1st call for unredirected requests 
@@ -77,10 +77,10 @@ db.once('open', function (callback) {
 	}));
 
 	// 2nd call for redirected requests
-	app.use(staticFileMiddleware);
+	app.use(staticFileMiddleware);*/
 
 	// Listen for connections to the port
-	server.listen(config.port, () => console.log('Server listening on port ' + config.baseURL+config.port));
+	server.listen(config.serverPort, () => console.log('Server listening on port ' + config.baseURL+config.serverPort));
 });
 
 function refreshAllUserTokens() {

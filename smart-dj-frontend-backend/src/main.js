@@ -35,7 +35,7 @@ import VueGoogleCharts from 'vue-google-charts'
 Vue.use(VueGoogleCharts)
 
 Vue.use(new VueSocketIO({
-  connection: config.baseURL+config.port,
+  connection: config.baseURL+config.serverPort,
 }));
 
 library.add(faTrash);
