@@ -419,6 +419,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -450,6 +451,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -481,6 +483,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -512,6 +515,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -543,6 +547,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -574,6 +579,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {
@@ -605,6 +611,7 @@ module.exports = function (app, io) {
 				created: req.body.timestamp,
 				received: received,
 				executed: executed,
+				totalTime: executed - req.body.timestamp
 			}
 		});
 		new_request.save((error) => {

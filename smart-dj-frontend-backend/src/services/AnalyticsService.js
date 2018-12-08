@@ -10,6 +10,9 @@ export default {
 	getKinect() {
 		return Api().get('/requests/kinect');
 	},
+	getVoice() {
+		return Api().get('/requests/voice');
+	},
 	getEndpoint(endpoint) {
 		return Api().get(`/requests/endpoint/${endpoint}`)
 	},
@@ -30,5 +33,5 @@ export default {
 	},
 	getSessions() {
 		return Api().get('/sessions');
-	}
+	},
 }

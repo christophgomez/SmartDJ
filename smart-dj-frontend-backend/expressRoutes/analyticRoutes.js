@@ -49,6 +49,21 @@ analyticsRoute.route('/requests/kinect').get((req, res) => {
 	});
 });
 
+analyticsRoute.route('/requests/voice').get((req, res) => {
+	Request.find({ 'from': 'Voice' }, (err, documents) => {
+		if (err) {
+			console.log(err);
+			return res.send({
+				success: false
+			});
+		}
+		return res.send({
+			success: true,
+			data: documents
+		});
+	})
+});
+
 analyticsRoute.route('/requests/endpoint/:endpoint').get((req, res) => {
 	Request.find({ 'endpoint' : req.params.endpoint }, (err, documents) => {
 		if (err) {

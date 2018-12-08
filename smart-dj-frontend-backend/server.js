@@ -3,7 +3,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
-const http = require('http');
 var request = require('request');
 var config = require('./config/settings');
 const my_client_id = config.spotifyClientId;
@@ -56,6 +55,7 @@ db.once('open', function (callback) {
 			console.log('no users');
 		}
 	})
+
 	const spotifyRoutes = require('./expressRoutes/spotifyRoutes.js')(app, io);
 	app.use('/spotify', spotifyRoutes);
 	const userRoutes = require('./expressRoutes/userRoutes.js');
@@ -63,10 +63,8 @@ db.once('open', function (callback) {
 	const analyticRoutes = require('./expressRoutes/analyticRoutes.js');
 	app.use('/analytics', analyticRoutes);
 
-	var port = config.serverPort;
-
 	// Listen for connections to the port
-	server.listen(port, () => console.log('Server listening on port ' + port));
+	server.listen(config.serverPort, () => console.log('Server listening on port ' + config.baseURL+config.serverPort));
 });
 
 function refreshAllUserTokens() {

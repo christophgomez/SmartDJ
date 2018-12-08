@@ -174,7 +174,7 @@
 							 <GChart type='PieChart' :data="pieData" :options="pieOptions"/>
 							 <hr>
 							 <p style='text-align:left'>Execution Time per Request</p>
-							 <GChart type='Timeline' :data="timeData" :options="timeOptions" :settings="{ packages: ['timeline'] }"/>
+							 <GChart type='ScatterChart' :data="timeData" :options="timeOptions" :settings="{ packages: ['scatter'] }"/>
 							 <hr>
 							 <p style='text-align:left'>Listening Sessions</p>
 							 <GChart type='Timeline' :data="sessionData" :options="sessionOptions" :settings="{ packages: ['timeline'] }"/>
@@ -226,7 +226,7 @@ export default {
     				duration: 1000,
     				easing: "out"
 				},
-				colors: ['#42b983', '#b95242'],
+				colors: ['#42b983', '#b95242', '#1976D2'],
 			},
 			pieData: [],
 			lineData:[],
@@ -240,6 +240,7 @@ export default {
 			},
 			timeData: [],
 			timeOptions: {
+				
 				animation: {
     				duration: 1000,
     				easing: "out"
@@ -341,13 +342,7 @@ export default {
 					this.onAnalytics = false;
 					break;
 				case 'analytics':
-					this.getAnalyticsCount();
 					this.getAnalytics();
-					this.onSpotify = false;
-					this.onUsers = false;
-					this.onOtherSettings = false;
-					this.onAnalytics = true;
-					this.title= 'Analytics';
 					break;
 				}
 			},
@@ -533,6 +528,12 @@ export default {
 		},
 		async getAnalytics() {
 			this.$wait.start('api');
+			this.getAnalyticsCount();
+			this.onSpotify = false;
+			this.onUsers = false;
+			this.onOtherSettings = false;
+			this.onAnalytics = true;
+			this.title= 'Analytics';
 			this.getTotalBarCount();
 			this.getPieTotalBreakdown();
 			this.getLineAllRequestsByYear();
@@ -566,6 +567,11 @@ export default {
 				let tmp_data = ['Kinect', kinect_response.data.data.length];
 				p_data.push(tmp_data);
 			}
+			const voice_response = await AnalyticsService.getVoice();
+			if(voice_response.data.success) {
+				let tmp_data = ['Voice', voice_response.data.data.length];
+				p_data.push(tmp_data);
+			}
 			this.pieData = p_data;
 		},
 		async getLineAllRequestsByYear() {
@@ -577,7 +583,7 @@ export default {
 				var t_data = response.data.data;
 				var results = {}, date;
 				for(let i = 0; i < t_data.length; i++) {
-					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth()];
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(), new Date(t_data[i].time.created).getDate()];
 					results[date] = results[date] || 0;
   					results[date]++;
 				}
@@ -585,15 +591,18 @@ export default {
 				var resultMonths = Object.keys(results);
 				//console.log('keys: '+resultMonths);
 				for(let i = 0; i < 12; i++) {
-					let date = new Date(curr_year, i);
-					//console.log(date.getFullYear() +","+date.getMonth())
-					for(let j = 0; j < resultMonths.length; j++) {
-						if(date.getFullYear() +","+date.getMonth() === resultMonths[j]) {
-							temp_data = [date, results[resultMonths[j]]];
-							l_data.push(temp_data);
-						} else {
-							temp_data = [date, 0];
-							l_data.push(temp_data);
+					for(var k = 0; k < new Date(curr_year, i, 0).getDate(); k++) {
+						let date = new Date(curr_year, i, k);
+						//console.log(date.getFullYear() +","+date.getMonth()+","+date.getDate());
+						for(let j = 0; j < resultMonths.length; j++) {
+							if(date.getFullYear() +","+date.getMonth()+","+date.getDate() === resultMonths[j]) {
+								//console.log('MATCH');
+								temp_data = [date, results[resultMonths[j]]];
+								l_data.push(temp_data);
+							} else {
+								temp_data = [date, 0];
+								l_data.push(temp_data);
+							}
 						}
 					}
 				}
@@ -606,27 +615,28 @@ export default {
 			const curr_year = new Date().getFullYear();
 			const curr_month = new Date().getMonth();
 			const curr_day = new Date().getDate();
-			const response = await AnalyticsService.getMonth(curr_year, curr_month);
+			const response = await AnalyticsService.getYear(curr_year);
 			if(response.data.success) {
 				var temp_data = [];
 				var t_data = response.data.data;
 				var results = {}, date;
 				for(let i = 0; i < t_data.length; i++) {
-					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(), new Date(t_data[i].time.created).getWeek()];
+					date = [new Date(t_data[i].time.created).getFullYear(),new Date(t_data[i].time.created).getMonth(), new Date(t_data[i].time.created).getDate()];
 					results[date] = results[date] || 0;
   					results[date]++;
 				}
-				//console.log(results);
 				var resultWeeks = Object.keys(results);
-				//console.log('keys: '+resultWeeks);
-				for(let i = curr_day-28; i <= curr_day+1; i+=7) {
+				for(let i = -30; i <= new Date().getDate(); i++) {
 					let date = new Date(curr_year, curr_month, i);
 					//console.log(date.getFullYear() +","+date.getMonth()+","+date.getWeek());
 					for(let j = 0; j < resultWeeks.length; j++) {
-						if(date.getFullYear() +","+date.getMonth()+","+date.getWeek() === resultWeeks[j]) {
+						if(date.getFullYear() +","+date.getMonth()+","+date.getDate() === resultWeeks[j]) {
+							console.log('pushing '+results[resultWeeks[j]]+"for "+date.toString())
 							temp_data = [date, results[resultWeeks[j]]];
 							l_data.push(temp_data);
+							break;
 						} else {
+							console.log('pushing 0 for '+date.toString());
 							temp_data = [date, 0];
 							l_data.push(temp_data);
 						}
@@ -651,12 +661,9 @@ export default {
 					results[date] = results[date] || 0;
   					results[date]++;
 				}
-				console.log(results);
 				var resultDays = Object.keys(results);
-				console.log('keys: '+resultDays)
 				for(let i = curr_date - 6; i <= curr_date; i++) {
 					let date = new Date(curr_year, curr_month, i);
-					console.log(date.getFullYear() +","+date.getMonth() +","+date.getDate())
 					for(let j = 0; j < resultDays.length; j++) {
 						if(date.getFullYear() +","+date.getMonth() +","+date.getDate()=== resultDays[j]) {
 							temp_data = [date, results[resultDays[j]]];
@@ -687,16 +694,12 @@ export default {
 					results[date] = results[date] || 0;
   					results[date]++;
 				}
-				//console.log(results);
 				var resultDays = Object.keys(results);
-				//console.log(resultDays);
 				for(let i = curr_hours - 24; i <= curr_hours; i++) {
 					let date = new Date(curr_year, curr_month, curr_date, i);
-					//console.log(date.getFullYear() +","+date.getMonth() +","+date.getDate()+","+date.getHours())
 					for(let j = 0; j < resultDays.length; j++) {
 						if(date.getFullYear() +","+date.getMonth() +","+date.getDate()+","+date.getHours()=== resultDays[j]) {
 							const count = results[resultDays[j]];
-							//console.log('MATCH @ DATE: '+date+', placing count: '+count);
 							temp_data = [date, count];
 							l_data.push(temp_data);
 						} else {
@@ -718,23 +721,58 @@ export default {
 				var curr_date = new Date().getDate();
 				var temp_data = [];
 				for(let i = 0; i < response.data.data.length; i++) {
-					//let date = new Date(curr_year, curr_month, i);
 					temp_data = ['Session '+(i+1), new Date(response.data.data[i].createdAt), new Date(response.data.data[i].endedAt)];
 					s_data.push(temp_data);
 				}
-				console.log(s_data);
 				this.sessionData = s_data;
 			}
 		},
 		async getExecutionTime() {
-			var e_data = [["Request", "Start", "End"]];
+			var e_data = [["Enpdoint", "TotalTime", {type: 'string', role: 'tooltip'}]];
 			const response = await AnalyticsService.getAll();
 			if(response.data.success) {
 				var temp_data = [];
-				for(let i = 0; i < response.data.data.length; i++) {
-					let td = [response.data.data[i].endpoint, (response.data.data[i].time.created),(response.data.data[i].time.executed)];
+				for(let i = response.data.data.length - 1; i > response.data.data.length - 25; i--) {
+					let num = 0;
+					switch(response.data.data[i].endpoint) {
+						case 'play':
+						num = 1;
+						let td = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
 					e_data.push(td);
+						break;
+						case 'pause':
+						num = 2;
+						let tdd = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tdd);
+						break;
+						case 'next':
+						num = 3;
+						let tddd= [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tddd);
+						break;
+						case 'prev':
+						num = 4;
+						let tdddd = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tdddd);
+						break;
+						case 'shuffle':
+						num = 5;
+						let tddddd = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tddddd);
+						break;
+						case 'repeat':
+						num = 6;
+						let tdddddd = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tdddddd);
+						break;
+						case 'volume':
+						num = 7;
+						let tddddddd = [num, response.data.data[i].time.totalTime, response.data.data[i].endpoint+"\nTotal Execution Time: "+response.data.data[i].time.totalTime];
+					e_data.push(tddddddd);
+						break;
+					}
 				}
+				console.log(e_data);
 				this.timeData = e_data;
 			}
 		},

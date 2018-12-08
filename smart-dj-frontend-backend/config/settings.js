@@ -1,6 +1,6 @@
 module.exports = {
 	secret: 'secure',
-	baseURL: 'http://chrisbook.local:',
+	baseURL: 'http://localhost:',
 	serverPort: 8081,
 	clientPort: 8080,
 	spotifyClientId: 'c59420679278498bbd4186dd101f3f04',
