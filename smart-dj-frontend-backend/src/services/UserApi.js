@@ -3,6 +3,6 @@ const config = require('../../config/settings');
 
 export default () => {
 	return axios.create({
-		baseURL: config.baseURL+config.serverPort+'/users'
+		baseURL: config.baseURL+config.port+'/users'
 	});
 };

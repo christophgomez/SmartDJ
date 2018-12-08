@@ -80,7 +80,7 @@ db.once('open', function (callback) {
 	app.use(staticFileMiddleware);
 
 	// Listen for connections to the port
-	server.listen(config.serverPort, () => console.log('Server listening on port ' + config.baseURL+config.serverPort));
+	server.listen(config.port, () => console.log('Server listening on port ' + config.baseURL+config.port));
 });
 
 function refreshAllUserTokens() {
