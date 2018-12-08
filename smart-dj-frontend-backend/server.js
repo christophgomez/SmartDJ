@@ -5,6 +5,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 var request = require('request');
 var config = require('./config/settings');
+var history = require('connect-history-api-fallback');
+
 const my_client_id = config.spotifyClientId;
 const my_client_secret = config.spotifyClientSecret;
 
@@ -62,6 +64,20 @@ db.once('open', function (callback) {
 	app.use('/users', userRoutes);
 	const analyticRoutes = require('./expressRoutes/analyticRoutes.js');
 	app.use('/analytics', analyticRoutes);
+
+	// Middleware for serving '/dist' directory
+	const staticFileMiddleware = express.static('dist');
+
+	// 1st call for unredirected requests 
+	app.use(staticFileMiddleware);
+
+	// Support history api 
+	app.use(history({
+		index: '/dist/index.html'
+	}));
+
+	// 2nd call for redirected requests
+	app.use(staticFileMiddleware);
 
 	// Listen for connections to the port
 	server.listen(config.serverPort, () => console.log('Server listening on port ' + config.baseURL+config.serverPort));

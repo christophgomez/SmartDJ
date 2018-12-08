@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "server": "nodemon ./server.js",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "start": "node ./server.js"
   },
   "devServer": {
     "disableHostCheck": true
@@ -19,6 +20,7 @@
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
     "bootstrap-vue": "^2.0.0-rc.11",
+    "connect-history-api-fallback": "^1.5.0",
     "cors": "^2.8.4",
     "express": "^4.16.4",
     "http": "0.0.0",
