@@ -19,22 +19,6 @@ Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
 
 In `smart-dj-frontend-backend/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
 
-In `smart-dj-frontend-backend/webPlayer.html` change
-
-```js
-const api = axios.create({
-  baseURL: 'http://chrisbook.local:8081/spotify/'
-});
-```
-
-to
-
-```js
-const api = axios.create({
-  baseURL: 'http://localhost:8081/spotify/'
-});
-```
-
 <b>If you're developing on Windows:</b>
 
 Move `smart-dj-frontend-backend/webplayer.html` to the C drive
