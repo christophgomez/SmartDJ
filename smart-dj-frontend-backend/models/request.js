@@ -8,6 +8,7 @@ var RequestSchema = new Schema({
 		created: Number,
 		received: Number,
 		executed: Number,
+		totalTime: Number
 	}
 });
 
