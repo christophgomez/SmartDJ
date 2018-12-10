@@ -4,6 +4,8 @@ Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 
 ## Initial Project setup
 
+### Server Setup:
+
 Download the project and cd into the `smart-dj-frontend-backend` folder, then run:
 
 ```bash
@@ -68,6 +70,18 @@ npm run server
 ```bash
 npm run serve
 ```
+
+### Kinect Setup:
+
+<b>Ensure you have the Kinect for Windows SDK installed</b>, if you don't have it installed you can download it here:
+https://www.microsoft.com/en-us/download/details.aspx?id=44561
+
+Connect your Kinect V2 to the computer via USB 3.0.
+
+Go to Kinect Browser that you downloaded from the Kinect SDK, and go to Kinect configuration verifier. If everything passes, you kinect should be ready.
+
+Go to the smart-dj-kinect folder inside this repository and either double click “DiscreteGestureBasics-WPF.sln” to open the program with Visual Studio 2018 with debug mode, or go to “bin/x86/Debug/” and double click on the “DiscreteGestureBasics-WPF.exe”
+
 
 ## API Routes
 
