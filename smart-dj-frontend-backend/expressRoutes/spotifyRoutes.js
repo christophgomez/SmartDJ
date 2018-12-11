@@ -1,6 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 var request = require('request');
+var rp = require('request-promise-native');
 var exec = require('child_process').exec;
 const Token = require('../models/token');
 const User = require('../models/user');
@@ -839,20 +840,34 @@ module.exports = function (app, io) {
 		});
 	}
 
-	function play(token, res) {
+	async function play(token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/play",
+			method: `PUT`,
+			uri: "https://api.spotify.com/v1/me/player/play",
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 			json: true
 		};
-		request.put(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log('Play');
+			res.send({
+				success: true
+			});
+		} catch(error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Play');
 				res.send({
@@ -864,23 +879,37 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function pause(token, res) {
+	async function pause(token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/pause",
+			method: `PUT`,
+			uri: "https://api.spotify.com/v1/me/player/pause",
 			headers: {
 				"Authorization": 'Bearer ' + token,
 			},
 			json: true
 		};
-		request.put(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log('Pause');
+			res.send({
+				success: true
+			});
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Pause');
 				res.send({
@@ -892,23 +921,37 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function next(token, res) {
+	async function next(token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/next",
+			method: `POST`,
+			uri: "https://api.spotify.com/v1/me/player/next",
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 			json: true
 		};
-		request.post(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log('Skipped Track');
+			res.send({
+				success: true
+			});
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.post(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Skipped Track');
 				res.send({
@@ -920,23 +963,43 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function prev(token, res) {
+	async function prev(token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/previous",
+			method: `POST`,
+			uri: "https://api.spotify.com/v1/me/player/previous",
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 			json: true
 		};
-		request.post(options, (error, response, body) => {
+		try {
+			const response = await rp(options);
+			if (Promise.resolve(response.statusCode === 204)) {
+				console.log('Skipped Track Back');
+				res.send({
+					success: true
+				});
+			} else {
+				res.send({
+					success: false
+				});
+			}
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.post(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Skipped Track Back');
 				res.send({
@@ -948,23 +1011,37 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function shuffle(trueOrFalse, token, res) {
+	async function shuffle(trueOrFalse, token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/shuffle?state=" + trueOrFalse,
+			method: `PUT`,
+			uri: "https://api.spotify.com/v1/me/player/shuffle?state=" + trueOrFalse,
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 			json: true
 		};
-		request.put(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log('Shuffling: ' + trueOrFalse);
+			res.send({
+				success: true
+			});
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Shuffling: ' + trueOrFalse);
 				res.send({
@@ -976,23 +1053,37 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function repeat(trackContextOff, token, res) {
+	async function repeat(trackContextOff, token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/repeat?state=" + trackContextOff,
+			method: `PUT`,
+			uri: "https://api.spotify.com/v1/me/player/repeat?state=" + trackContextOff,
 			headers: {
 				'Authorization': 'Bearer '+token
 			},
 			json: true
 		};
-		request.put(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log('Repeat: ' + trackContextOff);
+			res.send({
+				success: true
+			});
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log('Repeat: ' + trackContextOff);
 				res.send({
@@ -1004,23 +1095,37 @@ module.exports = function (app, io) {
 					success: false
 				});
 			}
-		});
+		});*/
 	}
 
-	function setVolume(volumePercent, token, res) {
+	async function setVolume(volumePercent, token, res) {
 		if (token === undefined) {
 			return res.send({
 				success: false
 			});
 		}
 		var options = {
-			url: "https://api.spotify.com/v1/me/player/volume?volume_percent="+volumePercent,
+			method: `PUT`,
+			uri: "https://api.spotify.com/v1/me/player/volume?volume_percent="+volumePercent,
 			headers: {
 				'Authorization': 'Bearer ' + token
 			},
 			json: true
 		};
-		request.put(options, (error, response, body) => {
+		try {
+			await rp(options);
+			console.log("Volume set to: " + volumePercent);
+			res.send({
+				success: true
+			});
+		} catch (error) {
+			console.log(error);
+			Promise.reject(error);
+			res.send({
+				success: false
+			});
+		}
+		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
 				console.log("Volume set to: " + volumePercent);
 				res.send({
@@ -1032,7 +1137,7 @@ module.exports = function (app, io) {
 					success: false,
 				});
 			}
-		});
+		});*/
 	}
 	
 	async function getPrimaryToken(req) {
