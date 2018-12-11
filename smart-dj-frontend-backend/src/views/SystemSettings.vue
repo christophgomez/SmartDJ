@@ -510,7 +510,7 @@ export default {
 			}, 2000); 
 		},
 		async checkKinect() {
-			const reponse = await SpotifyService.checkKinect();
+			const response = await SpotifyService.checkKinect();
 			if(response.data.success === true) {
 				this.kinectStatus = 'Online';
 			} else {
