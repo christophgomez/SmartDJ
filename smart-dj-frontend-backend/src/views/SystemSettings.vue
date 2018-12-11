@@ -98,7 +98,9 @@
 									</div>
 									<br>
 									<span>Kinect Status: {{kinectStatus}}</span>
+									<br>
 									<b-button class='playbackControls' @click='player()'>Start Web Player</b-button>
+									<br>
 									<b-button class='playbackControls' @click='startKinect()'>Start Kinect</b-button>
 								</b-col>
         					<div class="w-100"></div>
@@ -216,7 +218,7 @@ export default {
 			onAnalytics: false,
 			analyticsLoaded: false,
 			analyticsCount: Number,
-			kinectStatus: String,
+			kinectStatus: 'Offline',
 			barOptions: {
 				animation: {
     				duration: 1000,
