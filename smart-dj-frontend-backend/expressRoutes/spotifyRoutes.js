@@ -380,6 +380,42 @@ module.exports = function (app, io) {
 		});
 	});
 
+	spotifyRoute.route('/kinect/script').post((req, res) => {
+		exec('DiscreteGestureBasics-WPF.exe', () => {
+			return res.status(200).send({
+				success: true,
+				message: 'child process created'
+			});
+		});
+	});
+
+	spotifyRoute.route('/kinect/script').get((req, res) => {
+		if (isRunning('KinectService.exe', "KinectService", "KinectService") !== false) {
+			return res.send({
+				success: true,
+			});
+		} else {
+			return res.send({
+				success: false
+			});
+		}
+	});
+
+	function isRunning(win, mac, linux) {
+		return new Promise(function (resolve, reject) {
+			const plat = process.platform
+			const cmd = plat == 'win32' ? 'tasklist' : (plat == 'darwin' ? 'ps -ax | grep ' + mac : (plat == 'linux' ? 'ps -A' : ''))
+			const proc = plat == 'win32' ? win : (plat == 'darwin' ? mac : (plat == 'linux' ? linux : ''))
+			if (cmd === '' || proc === '') {
+				resolve(false)
+			}
+			exec(cmd, function (err, stdout, stderr) {
+				resolve(stdout.toLowerCase().indexOf(proc.toLowerCase()) > -1)
+			})
+		})
+	}
+
+
 	spotifyRoute.route('/kinect/device_id').post((req, res) => {
 		kinect_id = req.body.id;
 		return res.status(204).send({
@@ -400,7 +436,7 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/kinect/play').put((req, res) => {
-		if (req.body.from === 'Kinect') {
+		/*if (req.body.from === 'Kinect') {
 			if (onSecondReq === false) {
 				console.log('First kinect request');
 				onSecondReq = true;
@@ -409,7 +445,7 @@ module.exports = function (app, io) {
 				onSecondReq = false;
 				console.log('Received 2nd request from kinect');
 			}
-		}
+		}*/
 		var received = Date.now();
 		play(primary_access_token, res);
 		var executed = Date.now();
@@ -432,7 +468,7 @@ module.exports = function (app, io) {
 	})
 
 	spotifyRoute.route('/kinect/pause').put((req, res) => {
-		if (req.body.from === 'Kinect') {
+		/*if (req.body.from === 'Kinect') {
 			if (onSecondReq === false) {
 				console.log('First kinect request');
 				onSecondReq = true;
@@ -441,7 +477,7 @@ module.exports = function (app, io) {
 				onSecondReq = false;
 				console.log('Received 2nd request from kinect');
 			}
-		}
+		}*/
 		var received = Date.now();
 		pause(primary_access_token, res);
 		var executed = Date.now();
@@ -981,17 +1017,10 @@ module.exports = function (app, io) {
 			json: true
 		};
 		try {
-			const response = await rp(options);
-			if (Promise.resolve(response.statusCode === 204)) {
-				console.log('Skipped Track Back');
-				res.send({
-					success: true
-				});
-			} else {
-				res.send({
-					success: false
-				});
-			}
+			await rp(options);
+			res.send({
+				success: true
+			});
 		} catch (error) {
 			console.log(error);
 			Promise.reject(error);
