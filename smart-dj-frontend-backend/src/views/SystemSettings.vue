@@ -96,7 +96,10 @@
 									<div v-for='device in primaryDevices' :key='device.name'>
 										<span v-if='device.is_active'>{{device.name}}</span>
 									</div>
-									<b-button class='playbackControls' @click='player'>Start Web Player</b-button>
+									<br>
+									<span>Kinect Status: {{kinectStatus}}</span>
+									<b-button class='playbackControls' @click='player()'>Start Web Player</b-button>
+									<b-button class='playbackControls' @click='startKinect()'>Start Kinect</b-button>
 								</b-col>
         					<div class="w-100"></div>
         						<b-col style='text-align:left'>
@@ -213,6 +216,7 @@ export default {
 			onAnalytics: false,
 			analyticsLoaded: false,
 			analyticsCount: Number,
+			kinectStatus: String,
 			barOptions: {
 				animation: {
     				duration: 1000,
@@ -294,6 +298,7 @@ export default {
 		this.getCurrentlyPlaying();
 		this.getPrimaryDevices();
 		this.getUsers();
+		this.checkKinect();
 		this.$wait.end('api');
 		setInterval(() => {
 			this.getPrimaryAccount();
@@ -494,6 +499,21 @@ export default {
 			setTimeout(() => {
 				self.getCurrentlyPlaying();
 			}, 2000); 
+		},
+		async startKinect() {
+			await SpotifyService.startKinect();
+			var self = this;
+			setTimeout(() => {
+				self.checkKinect();
+			}, 2000); 
+		},
+		async checkKinect() {
+			const reponse = await SpotifyService.checkKinect();
+			if(response.data.success === true) {
+				this.kinectStatus = 'Online';
+			} else {
+				this.kinectStatus = 'Offline';
+			}
 		},
 		async getCurrentlyPlaying() {
 			const response = await SpotifyService.getPrimaryCurrentlyPlaying();

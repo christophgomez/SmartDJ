@@ -78,7 +78,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             // initialize the MainWindow
             this.InitializeComponent();
             this.WindowState = System.Windows.WindowState.Minimized;
-            //Hide();
+            Hide();
 
             // set our data context objects for display in UI
             this.DataContext = this;

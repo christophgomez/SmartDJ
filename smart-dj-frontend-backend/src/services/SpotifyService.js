@@ -43,6 +43,12 @@ export default {
 	startPlayer() {
 		return Api().post('/kinect/player');
 	},
+	startKinect() {
+		return Api().post('/kinect/script');
+	},
+	checkKinect() {
+		return Api().get('/kinect/script');
+	},
 	playPrimary(params) {
 		return Api().put('/kinect/play', params);
 	},
