@@ -37,6 +37,12 @@ export default {
 	getPrimaryDevices() {
 		return Api().get('/kinect/devices');
 	},
+	setKinectDevice(device_id) {
+		return Api().post("/kinect/device_id", {id: device_id })
+	},
+	transferKinectDevice() {
+		return Api().put('kinect/transfer');
+	},
 	getUserDevices(token) {
 		return Api().get(`/user/devices/${token}`,);
 	},

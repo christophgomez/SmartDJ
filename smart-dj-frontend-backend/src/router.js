@@ -33,6 +33,11 @@ export default new Router({
       component: () => import('./views/SystemSettings.vue'),
     },
     {
+      path: '/player',
+      name: 'player',
+      component: () => import('./views/WebPlayer.vue'),
+    },
+    {
       path: '*',
       redirect: '/'
     }
