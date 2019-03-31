@@ -6,35 +6,60 @@
     		<span class="menu-toggler__line"></span>
     		<span class="menu-toggler__line"></span>
   		</label>
-    <vs-sidebar :parent="$refs.vis" default-index="1" color="dark" class="sidebarx" spacer v-model="active">
+    <vs-sidebar parent='body' default-index="1" color="dark" class="sidebarx" spacer v-model="active">
 
-      <div class="header-sidebar" slot="header">
+      <div class="header-sidebar" slot="header" style='text-align:center'>
         <h3><img src="../assets/logo.png" alt="Logo" height="32" width="32">
         </h3>
-
       </div>
+      <vs-sidebar-group :index='"1"' title="Music">
 
-      <vs-sidebar-group index=1 title="Music">
-        <vs-sidebar-group index=1.1 title='Playlists'>
-          <h4>Coming Soon</h4>
+        <div @click='getRecent()'>
+        <vs-sidebar-group index=1.1 title='Recently Played'>
+          <div v-for='(track, index) in recentlyPlayed' :key='index'>
+            <vs-sidebar-item :index='"1.1."+(index+1)'>{{track.name}}</vs-sidebar-item>
+          </div>
+        </vs-sidebar-group>
+        </div>
+
+        <vs-sidebar-group index=1.2 title='Your Music'>
+          <vs-sidebar-group index=1.2 title='Playlists'>
+            <vs-sidebar-item index=1.2.1 v-if='lessPlaylists===true' @click='getLessPlaylists()' icon='arrow_drop_up'>Previous</vs-sidebar-item>
+            <div v-for='(item, index) in playlists' :key='index' style='text-align:left;font-size:.9em; font-weight: 300;'>
+              <vs-sidebar-item icon='album' :index='"1.2."+(index+3)' @click='playPlaylist(item.uri)'>{{item.name}}</vs-sidebar-item>
+            </div>
+            <vs-sidebar-item index=1.2.99 v-if='morePlaylists===true' @click='getMorePlaylists()' icon='arrow_drop_down'>More</vs-sidebar-item>
+          </vs-sidebar-group>
+          <vs-sidebar-group index=1.2.2 title='Library'>
+          <vs-sidebar-group title='Saved Albums'></vs-sidebar-group>
+          <vs-sidebar-group title='Saved Tracks'></vs-sidebar-group>
+          </vs-sidebar-group>
         </vs-sidebar-group>
 
-        <vs-sidebar-group index=1.2 title='Recently Played'>
-          <h4>Coming Soon</h4>
-        </vs-sidebar-group>
-
-        <vs-sidebar-group index=1.3 title='For You'>
-          <h4>Coming Soon</h4>
-        </vs-sidebar-group>
-
+        <!--<vs-sidebar-group index=1.3 title='Browse'>
+          <vs-sidebar-group index=1.3.4 title='Discover'><h4>Coming Soon</h4></vs-sidebar-group>
+          <vs-sidebar-group index=1.3.1 title='Categories'><h4>Coming Soon</h4></vs-sidebar-group>
+          <vs-sidebar-group index=1.3.2 title='Featured Playlists'><h4>Coming Soon</h4></vs-sidebar-group>
+          <vs-sidebar-group index=1.3.3 title='New Releases'><h4>Coming Soon</h4></vs-sidebar-group>
+        </vs-sidebar-group>-->
       </vs-sidebar-group>
+      
+      <vs-sidebar-group index=2 title='Visuals'>
+        <vs-sidebar-group index=2.2 title='Settings'>
+          <vs-sidebar-group title='Colors'>
+            <vs-sidebar-group title='Shapes'>
+              <vs-sidebar-group title='Presets'>
 
-      <vs-sidebar-group index=2 title='Visualizations'>
-        <h4>Coming Soon</h4>
-      </vs-sidebar-group>
-
-      <vs-sidebar-group index=3 title='Settings'>
-        <h4>Coming Soon</h4>
+              </vs-sidebar-group>
+              <vs-sidebar-group title='Custom'>
+                
+              </vs-sidebar-group>
+            </vs-sidebar-group>
+            <vs-sidebar-group title='Background'></vs-sidebar-group>
+          </vs-sidebar-group>
+          <vs-sidebar-group title='Shape'></vs-sidebar-group>
+          <vs-sidebar-group title='Pattern'></vs-sidebar-group>
+        </vs-sidebar-group>
       </vs-sidebar-group>
 
       <vs-sidebar-group index=4 title='Info'>
@@ -85,6 +110,7 @@
 </template>
 
 <script>
+import SpotifyService from '@/services/SpotifyService';
 export default {
   name: 'Menu',
   data() {
@@ -92,8 +118,21 @@ export default {
       music: false,
       visualizations: false,
       settings: false,
-      active: false
+      active: false,
+      playlists:[],
+      playlistOffset: 0,
+      morePlaylists: true,
+      lessPlaylists: false,
+      playlistId: null,
+      tracks:[],
+      trackOffset: 0,
+      moreTracks: true,
+      lessTracks: false,
+      recentlyPlayed: [],
     }
+  },
+  created() {
+    this.getPlaylists();
   },
   methods: {
     logout() {
@@ -106,48 +145,81 @@ export default {
 			}
       window.postMessage(data, "*");*/
     },
-    toggleAllFalseExcept(type) {
-      switch(type){
-        case 'music':
-          this.visualizations = false;
-          this.settings = false;
-          break;
-        case 'visualizations':
-          this.music = false;
-          this.settings = false;
-          break;
-        case 'settings':
-          this.visualizations = false;
-          this.music = false;
+    async getPlaylists() {
+      const response = await SpotifyService.getPlaylists(localStorage.access_token, this.playlistOffset);
+      if(response.data.success === true) {
+          for(let i = 0; i < response.data.playlists.items.length; i++) {
+            this.playlists.push(response.data.playlists.items[i])
+          }
+          if(response.data.playlists.next !== null) {
+            this.morePlaylists = true;
+          } else {
+            this.morePlaylists = false;
+          }
+      }
+      if(this.playlistOffset !== 0) {
+        this.lessPlaylists = true;
       }
     },
-    toggle(type) {
-      switch(type) {
-        case 'music':
-          this.toggleAllFalseExcept('music');
-          if(this.music === true) {
-            this.music = false;
-          } else {
-            this.music = true;
-          }
-          break;
-        case 'visualizations':
-          this.toggleAllFalseExcept('visualizations');
-          if(this.visualizations === true) {
-            this.visualizations = false;
-          } else {
-            this.visualizations = true;
-          }
-          break;
-        case 'settings':
-          this.toggleAllFalseExcept('settings');
-          if(this.settings === true) {
-            this.settings = false;
-          } else {
-            this.settings = true;
-          }
-          break;
+    async playPlaylist(uri){
+      await SpotifyService.playPlaylist(localStorage.access_token, uri);
+    },
+    async getRecent() {
+      const response = await SpotifyService.getRecentlyPlayed(localStorage.access_token);
+      if(response.data.success === true) {
+        console.log('success');
+        this.recentlyPlayed = [];
+        for(let i = 0; i < response.data.items.items.length; i++) {
+          this.recentlyPlayed.push(response.data.items.items[i].track);
+        }
       }
+    },
+    async getPlaylistTracks(id) {
+      this.tracks = [];
+      if(id !== this.playlistId) {
+        this.trackOffset = 0;
+        this.playlistId = id;
+      }
+      const response = await SpotifyService.getPlaylistTracks(localStorage.access_token, id, this.trackOffset);
+      if(response.data.success === true) {
+        for(let i = 0; i < response.data.tracks.items.length; i++) {
+          this.tracks.push(response.data.tracks.items[i]);
+        }
+        if(response.data.tracks.next !== null) {
+          this.moreTracks = true;
+        } else {
+          this.moreTracks = false;
+        }
+      }
+      if(this.trackOffset !== 0) {
+        this.lessTracks = true;
+      }
+    },
+    getMoreTracks() {
+      this.trackOffset += 20;
+      this.getPlaylistTracks(this.playlistId);
+    },
+    getLessTracks(){
+      this.trackOffset -= 20;
+      if(this.trackOffset <= 0) {
+        this.trackOffset = 0;
+        this.lessTracks = false;
+      }
+      this.getPlaylistTracks(this.playlistId);
+    },
+    getMorePlaylists() {
+      this.playlists = [];
+      this.playlistOffset += 5;
+      this.getPlaylists();
+    },
+    getLessPlaylists() {
+      this.playlists = [];
+      this.playlistOffset -= 5;
+      if(this.playlistOffset <= 0) {
+        this.playlistOffset = 0;
+        this.lessPlaylists = false;
+      }
+      this.getPlaylists();
     }
   }
 }
@@ -165,8 +237,8 @@ export default {
 
 .header-sidebar {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   flex-direction: column;
   width: 100%;
 }

@@ -1,29 +1,32 @@
 <template>
   <div id="auth">
     <div v-if='success===true' class='success'>
-      <h1>Spotify Link Successful!</h1>
-      <hr>
-      <p>Click the Spotilize Chrome Extension button in the browser toolbar now!</p>
-      <p>You'll do that everytime you want to use the app from now on.</p>
-      <small>(Forget the app URL!! It won't work if you don't click that button. Trust me!)</small><br><br>
-      <p>Still reading? Click that button!</p>
+      <div v-if='user===false'>
+        <h1>Thank you for using SmartDJ!</h1>
+        <h3>To control your Spotify using gestures and your webcam we need to take a few pictures of you</h3>
+        <p>These pictures will be used by our machine learning algorithm to implement facial recognition</p>
+        <p>Click the button below to take finish creating your an account</p>
+        <md-button class="md-raised chr">Continue</md-button>
+      </div>
     </div>
     <div v-if='success===false' class='fail'>
-      <h1>Uh oh!</h1>
-      <hr>
-      <p>Something went wrong linking your Spotify Account</p><font-awesome-icon icon='frown' size="3x"/> <br><br><p>Please go back and try again</p>
+        <h1>Uh oh!</h1>
+        <hr>
+        <p>Something went wrong linking your Spotify Account</p><font-awesome-icon icon='frown' size="3x"/> <br><br><p>Please go back and try again</p>
     </div>
   </div>
 </template>
 
 <script>
 import SpotifyService from '@/services/SpotifyService';
+import UserService from '@/services/UserService';
 
 export default {
   name: 'Auth',
   data () {
     return {
       success: Boolean,
+      user: Boolean,
       code: null
     }
   },
@@ -47,13 +50,41 @@ export default {
         this.success = true;
         localStorage.setItem('access_token', response.data.access_token);
         localStorage.setItem('refresh_token', response.data.refresh_token);
+
+        // check if user exists in the database
+        
+        // get this user's email from spotify to check against
+        const eRes = await SpotifyService.getProfile(response.data.access_token);
+
+        // server returned an email
+        if(eRes.data.success === true) {
+          var email = eRes.data.email;
+
+          // check if that email is in the database
+          const pRes = await UserService.getUser(email);
+
+          // if true, continue to visualizer, start python script on backend
+          if(pRes.data.success === true) {
+            this.user = true;
+            this.$router.replace({name: 'visualizer'});
+
+            // start the python script
+          }
+          
+          // Create a new user
+          else {
+            this.user = false;
+          }
+        }
+
+        // couldn't get a response from spotify, probably a bad access code, which is a big bug and shouldn't happen in this if  
+        else {
+
+        }
       } else {
         this.success = false;
       }
     },
-    cont() {
-      this.$router.replace({name: 'visualizer'});
-    }
   }
 }
 </script>
@@ -65,6 +96,11 @@ export default {
   margin: 0 auto;
   background: #13242f;
 }
+.chr {
+  background-color:#0266C8;
+  margin-top:1em;
+  color:white;
+}
 hr {
     display: block;
     height: 1px;
@@ -74,17 +110,11 @@ hr {
     padding: 0;
     width: 25%;
 }
-.md-button {
-  background-color:#42b983;
-  color:black;
-  border:none;
-}
 .fail {
   color: white;
   width: 100%;
   text-align:center;
   height: 100%;
-  margin: 10% auto;
   padding: 10px;
   position: relative;
 }
@@ -93,7 +123,6 @@ hr {
   width: 100%;
   text-align:center;
   height: 100%;
-  margin: 10% auto;
   padding: 10px;
   position: relative;
 }

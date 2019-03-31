@@ -55,6 +55,15 @@ export default {
 	getTrackInfo(access_token, id) {
 		return Api().get(`/track/${access_token}/${id}`);
 	},
+	getPlaylists(access_token, offset) {
+		return Api().get(`playlists/${access_token}/${offset}`);
+	},
+	playPlaylist(access_token, uri) {
+		return Api().put('playlists/play', { access_token: access_token, uri: uri });
+	},
+	getPlaylistTracks(access_token,id, offset) {
+		return Api().get(`playlists/${id}/tracks/${access_token}/${offset}`);
+	},
 	analyzeTrack(access_token, id) {
 		return Api().get(`/analyze/${access_token}/${id}`);
 	},

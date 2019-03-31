@@ -29,6 +29,7 @@ export default {
 			ratio: null,
 			ctx: null,
 			bands: null,
+			prevEnergy: [],
 			requestid: null,
 			canvas: HTMLElement,
 		}

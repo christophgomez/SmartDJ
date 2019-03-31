@@ -1,6 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 var request = require('request');
+const Token = require('../models/token');
 var rp = require('request-promise-native');
 var config;
 if (process.env.NODE_ENV !== 'production') {
@@ -18,13 +19,13 @@ module.exports = function (app, io) {
 		port = "";
 	}
 	const baseURL = process.env.baseURL || config.baseURL;
-	const redirect_uri = baseURL+ port + "/success";
+	const redirect_uri = baseURL + port + "/success";
 
 	/***********************************SOCKET**********************************************/
 
 	io.on('connection', function (socket) {
-		console.log('client connected');
-		
+		//console.log('client connected');
+
 		socket.on('ready', (data) => {
 			//transferPlayback(data.id, data.access_token, data.play);
 			socket.emit('playerReady', data);
@@ -41,7 +42,7 @@ module.exports = function (app, io) {
 		socket.on('paused', () => {
 			socket.emit('paused');
 		});
-		
+
 		socket.on('played', () => {
 			socket.emit('played');
 		})
@@ -81,16 +82,17 @@ module.exports = function (app, io) {
 		};
 		request.post(authOptions, function (error, response, body) {
 			if (!error && response.statusCode === 200) {
-				console.log('spotify auth successful');
-					access_token = body.access_token;
-					refresh_token = body.refresh_token;
+				////console.log('spotify auth successful');
+				access_token = body.access_token;
+				refresh_token = body.refresh_token;
+				updateToken(access_token, refresh_token);
 				return res.status(200).send({
 					success: true,
 					access_token: access_token,
 					refresh_token: refresh_token
 				});
 			} else {
-				console.log(body);
+				////console.log(body);
 				return res.send({
 					success: false
 				});
@@ -98,9 +100,86 @@ module.exports = function (app, io) {
 		});
 	});
 
+	function updateToken(primary_access_token, primary_refresh_token) {
+		console.log("updating primary access token");
+
+		Token.findById(1, (err, token) => {
+			if (err) {
+				console.log(err);
+				return res.send({
+					success: false
+				});
+			}
+			if (!token) {
+				console.log("no token yet, creating new token");
+				var newToken = new Token({
+					_id: 1,
+					access_token: primary_access_token,
+					refresh_token: primary_refresh_token,
+				});
+				newToken.save((err) => {
+					if (err) {
+						console.log("error creating new token");
+						return false;
+					}
+					console.log("new primary token saved to db");
+					return true;
+				})
+			} else {
+				console.log("token exists in db, updating token");
+				token.access_token = primary_access_token;
+				token.refresh_token = primary_refresh_token;
+				token.save((error) => {
+					if (error) {
+						console.log("error updating token");
+						return false;
+					}
+					console.log("token updated");
+					return true;
+				});
+			}
+		});
+	}
+
+	spotifyRoute.route('/access_token').get((req, res) => {
+		console.log('getting primary token');
+		getPrimaryToken(req).then((data) => {
+			token = data;
+			if (primary_access_token === undefined) {
+				return res.send({
+					success: false,
+				});
+			}
+			return res.send({
+				success: true,
+				access_token: token.access_token,
+				refresh_token: token.refresh_token
+			});
+		});
+	});
+
+	async function getPrimaryToken(req) {
+		var token = req.app.get('primary_access_token');
+		if (token === undefined) {
+			const response = await asyncGetPrimaryToken();
+			return response;
+		} else {
+			return token;
+		}
+	}
+
+	async function asyncGetPrimaryToken() {
+		try {
+			const token = await Token.findById(1).exec();
+			return token.access_token;
+		} catch (err) {
+			console.log("something went wrong getting primary access token");
+		}
+	}
+
 	spotifyRoute.route('/access_token/refresh').post((req, res) => {
 		refresh_token = req.body.refresh_token;
-		console.log(" Refresh: " + refresh_token);
+		////console.log(" Refresh: " + refresh_token);
 		var authOptions = {
 			url: 'https://accounts.spotify.com/api/token',
 			form: {
@@ -114,13 +193,14 @@ module.exports = function (app, io) {
 		};
 		request.post(authOptions, function (error, response, body) {
 			if (!error && response.statusCode === 200) {
-				console.log('Access token refreshed');
+				////console.log('Access token refreshed');
+				updateToken(body.access_token, refresh_token);
 				return res.send({
 					success: true,
 					access_token: body.access_token
 				})
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -146,12 +226,12 @@ module.exports = function (app, io) {
 
 	spotifyRoute.route('/play').put((req, res) => {
 		play(req.body.access_token, res);
-	})
+	});
 
 	spotifyRoute.route('/pause').put((req, res) => {
 		pause(req.body.access_token, res);
-	})
-	
+	});
+
 	spotifyRoute.route('/next').post((req, res) => {
 		next(req.body.access_token, res);
 	});
@@ -179,7 +259,7 @@ module.exports = function (app, io) {
 	spotifyRoute.route('/profile/:access_token').get((req, res) => {
 		return getProfile(req.params.access_token, res);
 	});
-	
+
 	spotifyRoute.route('/top_artists/:access_token').get((req, res) => {
 		return getTopArtists(req.params.access_token, res);
 	});
@@ -202,12 +282,79 @@ module.exports = function (app, io) {
 
 	spotifyRoute.route('/analyze/:access_token/:id').get((req, res) => {
 		return analyze(req.params.access_token, req.params.id, res);
-	})
+	});
+
+	spotifyRoute.route('/playlists/:access_token/:offset').get((req, res) => {
+		return getPlaylists(req.params.access_token, req.params.offset, res);
+	});
+
+	spotifyRoute.route('/playlists/play').put((req, res) => {
+		return playPlaylist(req.body.access_token, req.body.uri, res);
+	});
+
+	spotifyRoute.route('/playlists/:id/tracks/:access_token/:offset').get((req, res) => {
+		return getPlaylistTracks(req.params.access_token, req.params.id, req.params.offset, res);
+	});
 
 	/***********************************END ROUTES**********************************************/
 
 
 	/***********************************HELPERS**********************************************/
+
+	function getPlaylists(token, offset, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: 'https://api.spotify.com/v1/me/playlists?offset=' + offset + "&limit=5",
+			headers: {
+				'Authorization': 'Bearer ' + token
+			},
+			json: true
+		};
+
+		request.get(options, (error, response, body) => {
+			if (!error && response.statusCode === 200) {
+				return res.send({
+					success: true,
+					playlists: body
+				});
+			} else {
+				return res.send({
+					success: false
+				});
+			}
+		});
+	}
+
+	function getPlaylistTracks(token, id, offset, res) {
+		if (token === undefined) {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks?offset=' + offset + "&limit=20",
+			headers: {
+				'Authorization': 'Bearer ' + token
+			},
+			json: true
+		};
+		request.get(options, (error, response, body) => {
+			if (!error && response.statusCode === 200) {
+				return res.send({
+					success: true,
+					tracks: body
+				});
+			} else {
+				return res.send({
+					success: false
+				});
+			}
+		});
+	}
 
 	function getProfile(token, res) {
 		if (token === undefined) {
@@ -236,7 +383,7 @@ module.exports = function (app, io) {
 					type: body.product,
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -251,7 +398,7 @@ module.exports = function (app, io) {
 			});
 		}
 		var options = {
-			url: 'https://api.spotify.com/v1/tracks/'+id,
+			url: 'https://api.spotify.com/v1/tracks/' + id,
 			headers: {
 				'Authorization': 'Bearer ' + token
 			},
@@ -265,7 +412,7 @@ module.exports = function (app, io) {
 					track: body,
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -294,7 +441,7 @@ module.exports = function (app, io) {
 					analysis: body,
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -329,7 +476,7 @@ module.exports = function (app, io) {
 					object: null
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -354,7 +501,7 @@ module.exports = function (app, io) {
 			if (!error && response.statusCode === 200) {
 				return res.send({
 					success: true,
-					object: body
+					items: body
 				});
 			} else {
 				return res.send({
@@ -384,7 +531,7 @@ module.exports = function (app, io) {
 					artists: body.items
 				})
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -402,7 +549,7 @@ module.exports = function (app, io) {
 		options = {
 			url: "https://api.spotify.com/v1/me/player/devices",
 			headers: {
-					'Authorization': 'Bearer ' + token,
+				'Authorization': 'Bearer ' + token,
 			},
 			json: true
 		}
@@ -413,7 +560,7 @@ module.exports = function (app, io) {
 					devices: body.devices
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -423,7 +570,7 @@ module.exports = function (app, io) {
 
 	function transferPlayback(id, token, play = true, res) {
 		if (token === undefined || token === '' || id === undefined || id === '') {
-			console.log('cant transfer to player, no access token or id')
+			//console.log('cant transfer to player, no access token or id')
 			return res.send({
 				success: false
 			});
@@ -443,12 +590,41 @@ module.exports = function (app, io) {
 		};
 		request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
-				console.log('playback started on webplayer');
+				//console.log('playback started on webplayer');
 				return res.send({
 					success: true
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
+				return res.send({
+					success: false
+				});
+			}
+		});
+	}
+
+	function playPlaylist(token, uri, res) {
+		if (token === undefined || token === '' || uri === undefined || uri === '') {
+			return res.send({
+				success: false
+			});
+		}
+		var options = {
+			url: "https://api.spotify.com/v1/me/player/play",
+			body: {
+				'context_uri': uri,
+			},
+			headers: {
+				'Authorization': 'Bearer ' + token
+			},
+			json: true
+		};
+		request.put(options, (error, response, body) => {
+			if (!error && response.statusCode === 204) {
+				return res.send({
+					success: true
+				});
+			} else {
 				return res.send({
 					success: false
 				});
@@ -475,8 +651,8 @@ module.exports = function (app, io) {
 			res.send({
 				success: true
 			});
-		} catch(error) {
-			console.log(error);
+		} catch (error) {
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -504,7 +680,7 @@ module.exports = function (app, io) {
 				success: true
 			});
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -532,7 +708,7 @@ module.exports = function (app, io) {
 				success: true
 			});
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -560,7 +736,7 @@ module.exports = function (app, io) {
 				success: true
 			});
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -575,7 +751,7 @@ module.exports = function (app, io) {
 			});
 		}
 		options = {
-			url: "https://api.spotify.com/v1/me/player/seek?position_ms="+ms,
+			url: "https://api.spotify.com/v1/me/player/seek?position_ms=" + ms,
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
@@ -587,7 +763,7 @@ module.exports = function (app, io) {
 					success: true
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				return res.send({
 					success: false
 				});
@@ -632,18 +808,18 @@ module.exports = function (app, io) {
 			method: `PUT`,
 			uri: "https://api.spotify.com/v1/me/player/repeat?state=" + trackContextOff,
 			headers: {
-				'Authorization': 'Bearer '+token
+				'Authorization': 'Bearer ' + token
 			},
 			json: true
 		};
 		try {
 			await rp(options);
-			console.log('Repeat: ' + trackContextOff);
+			//console.log('Repeat: ' + trackContextOff);
 			res.send({
 				success: true
 			});
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -651,12 +827,12 @@ module.exports = function (app, io) {
 		}
 		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
-				console.log('Repeat: ' + trackContextOff);
+				//console.log('Repeat: ' + trackContextOff);
 				res.send({
 					success: true
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				res.send({
 					success: false
 				});
@@ -672,7 +848,7 @@ module.exports = function (app, io) {
 		}
 		var options = {
 			method: `PUT`,
-			uri: "https://api.spotify.com/v1/me/player/volume?volume_percent="+volumePercent,
+			uri: "https://api.spotify.com/v1/me/player/volume?volume_percent=" + volumePercent,
 			headers: {
 				'Authorization': 'Bearer ' + token
 			},
@@ -680,12 +856,12 @@ module.exports = function (app, io) {
 		};
 		try {
 			await rp(options);
-			console.log("Volume set to: " + volumePercent);
+			//console.log("Volume set to: " + volumePercent);
 			res.send({
 				success: true
 			});
 		} catch (error) {
-			console.log(error);
+			//console.log(error);
 			Promise.reject(error);
 			res.send({
 				success: false
@@ -693,12 +869,12 @@ module.exports = function (app, io) {
 		}
 		/*request.put(options, (error, response, body) => {
 			if (!error && response.statusCode === 204) {
-				console.log("Volume set to: " + volumePercent);
+				//console.log("Volume set to: " + volumePercent);
 				res.send({
 					success: true
 				});
 			} else {
-				console.log(body);
+				//console.log(body);
 				res.send({
 					success: false,
 				});

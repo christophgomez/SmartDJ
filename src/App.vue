@@ -107,6 +107,7 @@ export default {
       if(this.mouseMoveSet === false) {
         this._delay = setInterval(this.delayCheck, 500);
         addEventListener('mousemove', this.mouseMove, false);
+        addEventListener('scroll', this.scroll, false);
         this.mouseMoveSet = true;
       }
       this.webPlayer();
@@ -128,6 +129,7 @@ export default {
       if(this.mouseMoveSet === true) {
         clearInterval(this._delay);
         removeEventListener('mousemove', this.mouseMove, false);
+        removeEventListener('scroll', this.scroll, false);
         this.mouseMoveSet = false;
       }
       if(this.player !== null) {
@@ -240,6 +242,12 @@ export default {
       clearInterval(this._delay);
       this._delay = setInterval(this.delayCheck, 500);
     },
+    scroll() {
+      this.isShowing = true;
+      this.timedelay = 1;
+      clearInterval(this._delay);
+      this._delay = setInterval(this.delayCheck, 500);
+    },
     toggleMenu(){ 
       console.log('menu toggled');
       if(this.menu === false) {
@@ -249,7 +257,7 @@ export default {
       }
     },
     delayCheck() {
-      if(this.paused === true || this.menu === true) {
+      if(this.paused === true) {
         this.isShowing = true;
         return;
       }
