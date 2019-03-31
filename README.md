@@ -22,6 +22,7 @@ Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
 In `smartDJ/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
 
 <b>Ignore this for now</b>
+
 <b>If you're developing on Windows:</b>
 
 In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line:
@@ -128,7 +129,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   </tr>
   <tr>
     <td>GET</td>
-    <td>/spotify/access_token/</td>
+    <td>/spotify/access_token</td>
     <td>Get the System Token</td>
     <td>None</td>
     <td>Success Response Object
