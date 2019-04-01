@@ -6,7 +6,7 @@ Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 
 ### Server Setup:
 
-Download the project and cd into the `smart-dj-frontend-backend` folder, then run:
+Download the project and cd into the root folder, then run:
 
 ```bash
 npm install
@@ -19,11 +19,11 @@ Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
 
 ### Some code changes required if you are using this for development 
 
-In `smart-dj-frontend-backend/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
+In `smartDJ/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
+
+<b>Ignore this for now</b>
 
 <b>If you're developing on Windows:</b>
-
-Move `smart-dj-frontend-backend/webplayer.html` to the C drive
 
 In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line:
 
@@ -70,17 +70,6 @@ npm run server
 ```bash
 npm run serve
 ```
-
-### Kinect Setup:
-
-<b>Ensure you have the Kinect for Windows SDK installed</b>, if you don't have it installed you can download it here:
-https://www.microsoft.com/en-us/download/details.aspx?id=44561
-
-Connect your Kinect V2 to the computer via USB 3.0.
-
-Go to Kinect Browser that you downloaded from the Kinect SDK, and go to Kinect configuration verifier. If everything passes, you kinect should be ready.
-
-Go to the smart-dj-kinect folder inside this repository and either double click “DiscreteGestureBasics-WPF.sln” to open the program with Visual Studio 2018 with debug mode, or go to “bin/x86/Debug/” and double click on the “DiscreteGestureBasics-WPF.exe”
 
 
 ## API Routes
@@ -140,7 +129,7 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   </tr>
   <tr>
     <td>GET</td>
-    <td>/spotify/access_token/</td>
+    <td>/spotify/access_token</td>
     <td>Get the System Token</td>
     <td>None</td>
     <td>Success Response Object
@@ -151,13 +140,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
   refresh_token:String
 }</pre>
     </td>
-  </tr>
-  <tr>
-    <td>DELETE</td>
-    <td>/spotify/access_token/primary</td>
-    <td>Delete the System Primary Token</td>
-    <td>None</td>
-    <td>Success Response Object</td>
   </tr>
   <tr>
     <td>POST</td>
@@ -187,117 +169,6 @@ Request Body data should be formatted as a JSON Object as well, with exact param
     <td>/spotify/access_token/refresh</td>
     <td>Refresh the System Primary Token</td>
     <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/player</td>
-    <td>Start the System WebPlayer</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/device_id</td>
-    <td>Used to send the WebPlayer's device ID to the server</td>
-    <td>Request Body Data: <br>(The ID of the device to transfer too)
-      <pre lang='js'>
-{
-  id:String
-}</pre></td>
-     <td>Success Response object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/next</td>
-    <td>Skip to Primary Account's next track</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  from:String,
-  timestamp:Number,
-}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>POST</td>
-    <td>/spotify/kinect/prev</td>
-    <td>Skip to Primary Account's previoius track</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  from:String,
-  timestamp:Number,
-}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/transfer</td>
-    <td>Transfer the Primary Account's Current Playback to the System</td>
-    <td>None</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/play</td>
-    <td>Play the Primary Account's current playback</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  from:String,
-  timestamp:Number,
-}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/pause</td>
-    <td>Pause the Primary Account's current playback</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  from:String,
-  timestamp:Number,
-}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/shuffle</td>
-    <td>Toggle shuffle on the Primary Account's Playback</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  shuffle:Boolean,
-  from:String,
-  timestamp:Number
-}</pre>from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.</td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/repeat</td>
-    <td>Toggle repeat on the Primary Account's Playback</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  type:String,
-  from:String,
-  timestamp:Number
-}</pre>type must be: 'track', 'context', or 'off', from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
-    <td>Success Response Object</td>
-  </tr>
-  <tr>
-    <td>PUT</td>
-    <td>/spotify/kinect/volume</td>
-    <td>Set the volume on the Primary Account's Playback</td>
-    <td>Request Body Data:<pre lang='js'>
-{
-  volumePercent:Number,
-  from:String,
-  timestamp:Number
-}</pre>volumePercent must be an number from 0 to 100, from must be either 'Kinect' or 'App', timestamp must be a Unix-like timestamp in milliseconds since 1970.
-    </td>
     <td>Success Response Object</td>
   </tr>
   <tr>
