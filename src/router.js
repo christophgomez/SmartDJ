@@ -18,6 +18,11 @@ export default new Router({
       component: () => import('./views/AuthPage.vue')
     },
     {
+      path: '/AccountCreation',
+      name: 'AccountCreation',
+      component: () => import('./views/AccountCreation.vue')
+    },
+    {
       path: '/system_settings',
       component: () => import('./views/Profile.vue'),
     },

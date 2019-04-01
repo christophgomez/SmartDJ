@@ -51,6 +51,7 @@ userRoute.route('/add').post((req, res) => {
 		access_token: req.body.access_token,
 		refresh_token: req.body.refresh_token,
 		email: req.body.email,
+		images: req.body.images
 	});
 	new_user.save((error) => {
 		if (error) {

@@ -19,9 +19,11 @@ const app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 app.use(morgan('combined'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({
-	extended: false
+	parameterLimit: 100000,
+	limit: '100mb',
+	extended: true,
 }));
 app.use(cors());
 
@@ -77,14 +79,14 @@ db.once('open', function (callback) {
 	var spawn = require("child_process").spawn;
 	server.listen(port, () => {
 		console.log('Server listening on port ' + baseURL + port);
-		var process = spawn('python3', ["computer-vision/detection.py", "computer-vision/proto.prototxt.txt", "computer-vision/cafe.caffemodel"]);
+		/*var process = spawn('python3', ["computer-vision/detection.py", "computer-vision/proto.prototxt.txt", "computer-vision/cafe.caffemodel"]);
 		process.stdout.on('data', function (data) {
 			var command = data.toString();
 			if (command == "human") {
 				console.log("SERVER: OpenCV sees someone! \n")
 			}
 			console.log(data.toString());
-		});
+		});*/
 	});
 });
 

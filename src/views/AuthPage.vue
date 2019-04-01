@@ -6,7 +6,7 @@
         <h3>To control your Spotify using gestures and your webcam we need to take a few pictures of you</h3>
         <p>These pictures will be used by our machine learning algorithm to implement facial recognition</p>
         <p>Click the button below to take finish creating your an account</p>
-        <md-button class="md-raised chr">Continue</md-button>
+        <md-button class="md-raised chr" @click='cont()'>Continue</md-button>
       </div>
     </div>
     <div v-if='success===false' class='fail'>
@@ -85,6 +85,9 @@ export default {
         this.success = false;
       }
     },
+    cont() {
+      this.$router.replace({name: 'AccountCreation'});
+    }
   }
 }
 </script>
