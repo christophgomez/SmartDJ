@@ -16,6 +16,11 @@ npm install
 macOS - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/ <br>
 Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
 
+### Install the Chrome extension:
+
+The App wont work without the extension installed first.
+
+In Chrome, go to Extensions, click 'Load Unpacked Extension' navigate to the extension folder and select it. Make sure you copy the Extension ID and paste it in the config/settings.js file under extensionId.
 
 ### Some code changes required if you are using this for development 
 
