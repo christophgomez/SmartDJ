@@ -3,7 +3,7 @@
     <div id='container'>
       <canvas id='canvas'></canvas>
       <div class='overlay'>
-        <h1>Spotilize</h1><hr>
+        <h1>SmartDJ</h1><hr>
         <div id='extCheck'></div>
         <div v-if='ext===true'>
           <Link/>
@@ -11,7 +11,7 @@
         <div v-else>
           <md-button class="md-raised chr" @click='install()'>Add to Chrome</md-button>
         </div>
-        <footer>A Spotify visualizer made with <font-awesome-icon icon=heart style='color:red' /> by Christopher Gomez</footer>
+        <!--<footer>A Spotify visualizer made with <font-awesome-icon icon=heart style='color:red' /> by Christopher Gomez</footer>-->
       </div>
     </div>
   </div>
