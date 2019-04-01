@@ -27,6 +27,7 @@ export default {
 			height: Number,
 			streaming: Boolean,
 			video: null,
+			stream: null,
 			canvas: null,
 			photo: null,
 			startButton: null,
@@ -45,6 +46,7 @@ export default {
 		this.photo = document.getElementById('photo');
 		this.startButton = document.getElementById('startButton');
 		navigator.mediaDevices.getUserMedia({video: true, audio: false}).then((stream) => {
+			this.stream = stream;
 			this.video.srcObject = stream;
 			this.video.play();
 		}).catch((err) => {
@@ -94,14 +96,19 @@ export default {
 			const response = await SpotifyService.getProfile(localStorage.access_token);
 			if(response.data.success === true) {
 				var email = response.data.email;
+				var name = response.data.name;
 				var user = {
 					access_token: localStorage.access_token,
 					refresh_token: localStorage.refresh_token,
 					email: email,
+					name: name,
 					images: this.imgArray
 				};
 				const r2 = await UserService.createUser(user);
 				if(r2.data.success === true) {
+					this.video.pause();
+					var track = this.stream.getTracks()[0];  // if only one media track
+					track.stop();
 					this.$router.replace({name: 'visualizer'});
 				}
 			}

@@ -67,7 +67,7 @@ export default {
 		}
 	},
 	created() {
-		chrome.runtime.sendMessage('jidcihllhnmbjbnoijfepopdpkpgeobe', 'listening', (response) => {
+		chrome.runtime.sendMessage('lajigaapjnpmoooffpbdjehkkooeifjj', 'listening', (response) => {
         if(!response) {
           this.$router.replace({name: 'home'});
         } else if(response.listening === false) {

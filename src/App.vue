@@ -15,6 +15,11 @@ import Nav from '@/components/Nav.vue';
 import Controls from '@/components/Controls';
 import Hamburger from '@/components/Menu';
 import screenfull from 'screenfull';
+if (process.env.NODE_ENV !== 'production') {
+  var config = require('../config/settings');
+}
+
+var chromeId = process.env.chromeId || config.chromeId;
 
 export default {
   name: 'App',
@@ -50,7 +55,7 @@ export default {
     this.$wait.start('loading');
     if(localStorage.access_token) {
       if(chrome.runtime){
-        chrome.runtime.sendMessage('jidcihllhnmbjbnoijfepopdpkpgeobe', 'version', (response) => {
+        chrome.runtime.sendMessage(chromeId, 'version', (response) => {
           if(!response) {
             this.$router.replace({name: 'home'});
           } else if(response.version) {

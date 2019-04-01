@@ -20,6 +20,11 @@
 <script>
 import Link from '@/components/Link';
 import Particle from '@/util/Particle.js';
+if (process.env.NODE_ENV !== 'production') {
+  var config = require('../../config/settings');
+}
+
+var chromeId = process.env.chromeId || config.chromeId;
 
 export default {
   name: "Landing",
@@ -41,12 +46,12 @@ export default {
   },
   mounted() {
     if(chrome.runtime) {
-      chrome.runtime.sendMessage('jidcihllhnmbjbnoijfepopdpkpgeobe', 'version', (response) => {
+      chrome.runtime.sendMessage(chromeId, 'version', (response) => {
         if(!response) {
           document.getElementById('extCheck').innerHTML = "<p>To use this app you need to download the Chrome Extension first</p>";
           this.ext = false;
         } else if(response.version) {
-          document.getElementById('extCheck').innerHTML = "<p style='font-size:1.3em'>Link your Spotify Account to begin using Spotilize</p>"
+          document.getElementById('extCheck').innerHTML = "<p style='font-size:1.3em'>Link your Spotify Account to begin using SmartDJ</p>"
           this.ext = true;
         }
       });
