@@ -11,6 +11,7 @@
 
 <script>
 import SpotifyService from '@/services/SpotifyService.js';
+import PythonService from '@/services/PythonService.js';
 import Nav from '@/components/Nav.vue';
 import Controls from '@/components/Controls';
 import Hamburger from '@/components/Menu';
@@ -69,6 +70,9 @@ export default {
   },
   mounted() {
   },
+  beforeDestroy() {
+    this.killPython();
+  },
   sockets: {
     paused: function() {
       this.$notify({
@@ -93,6 +97,10 @@ export default {
         return;
       } else if(to.path === '/visualizer') {
         this.initVis();
+        this.startPython();
+        window.onbeforeunload = () => {
+          this.killPython();
+        }
       } else {
         return;
       }
@@ -145,6 +153,12 @@ export default {
         type: "term"
       }
       window.postMessage(data, "*");*/
+    },
+    async startPython() {
+      await PythonService.start();
+    },
+    async killPython() {
+      await PythonService.end();
     },
     async webPlayer() {
       if(this.player === null) {

@@ -89,7 +89,6 @@ while True:
 			#cv2.putText(frame, label, (5, 10),
 			#	cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 			if CLASSES[idx] == "person":
-				print(str(datetime.datetime.now())+" I see a human")
 				gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 				faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 				if len(faces) != 0:
@@ -97,7 +96,7 @@ while True:
 						roi_gray = gray[y:y+h, x:x+w]
 						eyes = eye_cascade.detectMultiScale(roi_gray)
 						if len(eyes) != 0:
-							print(str(datetime.datetime.now())+" they're looking at me")
+							print("1")
 							
 				
 			

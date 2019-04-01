@@ -63,6 +63,9 @@ db.once('open', function (callback) {
 	const userRoutes = require('./expressRoutes/userRoutes.js');
 	app.use('/users', userRoutes);
 
+	const pythonRoutes = require('./expressRoutes/pythonRoutes.js');
+	app.use('/python', pythonRoutes);
+
 	// Set up the server to serve the built frontend
 	app.use("/", serveStatic(path.join(__dirname, '/dist')));
 	// Catch all routes and redirect to the index file
@@ -76,17 +79,8 @@ db.once('open', function (callback) {
 	var baseURL = process.env.baseURL || config.baseURL;
 
 	// Use child process to run python - computer vsion
-	var spawn = require("child_process").spawn;
 	server.listen(port, () => {
 		console.log('Server listening on port ' + baseURL + port);
-		/*var process = spawn('python3', ["computer-vision/detection.py", "computer-vision/proto.prototxt.txt", "computer-vision/cafe.caffemodel"]);
-		process.stdout.on('data', function (data) {
-			var command = data.toString();
-			if (command == "human") {
-				console.log("SERVER: OpenCV sees someone! \n")
-			}
-			console.log(data.toString());
-		});*/
 	});
 });
 
