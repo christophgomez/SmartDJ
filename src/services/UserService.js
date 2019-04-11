@@ -18,5 +18,5 @@ export default {
 	},
 	updateToken(email, params) {
 		return Api().put(`/updateToken/${email}`, params);
-	}
+	},
 }

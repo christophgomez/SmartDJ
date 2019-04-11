@@ -1,6 +1,6 @@
 /* eslint-disable */
+const TokenFunctions = require('./expressRoutes/TokenFunctions');
 const express = require('express');
-var request = require('request');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -10,8 +10,7 @@ var config;
 if (process.env.NODE_ENV !== 'production') {
 	config = require('./config/settings');
 }
-const my_client_id = process.env.spotifyClientId || config.spotifyClientId;
-const my_client_secret = process.env.spotifyClientSecret || config.spotifyClientSecret;
+
 //var history = require('connect-history-api-fallback');
 
 // Set up the app
@@ -46,7 +45,8 @@ db.once('open', function (callback) {
 					app.set('primary_access_token', token.access_token);
 					app.set('primary_refresh_token', token.refresh_token);
 					console.log('Primary Token Configured');
-					refreshPrimaryToken(token);
+					TokenFunctions.refreshPrimaryToken(token);
+					TokenFunctions.setPrimaryToken(token);
 				}
 			});
 		} else if (count > 1) {
@@ -83,35 +83,3 @@ db.once('open', function (callback) {
 		console.log('Server listening on port ' + baseURL + port);
 	});
 });
-
-function refreshPrimaryToken(token) {
-
-	var authOptions = {
-		url: 'https://accounts.spotify.com/api/token',
-		form: {
-			grant_type: 'refresh_token',
-			refresh_token: token.refresh_token
-		},
-		headers: {
-			'Authorization': 'Basic ' + (new Buffer(my_client_id + ':' + my_client_secret).toString('base64'))
-		},
-		json: true
-	};
-	request.post(authOptions, function (error, response, body) {
-		if (!error && response.statusCode === 200) {
-
-			var primary_access_token = body.access_token;
-			console.log('Primary Access token refreshed');
-			token.access_token = primary_access_token;
-			token.save((err) => {
-				if (err) console.log(err);
-				else {
-					console.log('primary refresh successful');
-				}
-			});
-		} else {
-			console.log(body);
-			console.log('primary refresh unsuccessful');
-		}
-	});
-}

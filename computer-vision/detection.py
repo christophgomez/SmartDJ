@@ -31,6 +31,9 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 face_cascade = cv2.CascadeClassifier('/Users/Chris/Desktop/Programming/SmartDJNewFrontEnd/computer-vision/haarcascades/haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('/Users/Chris/Desktop/Programming/SmartDJNewFrontEnd/computer-vision/haarcascades/haarcascade_eye.xml')
+okay_cascade = cv2.CascadeClassifier('/Users/Chris/Desktop/Programming/SmartDJNewFrontEnd/computer-vision/haarcascades/haarcascade_okaygesture.xml')
+vicky_cascade = cv2.CascadeClassifier('/Users/Chris/Desktop/Programming/SmartDJNewFrontEnd/computer-vision/haarcascades/haarcascade_vickygesture.xml')
+smile_cascade = cv2.CascadeClassifier('/Users/Chris/Desktop/Programming/SmartDJNewFrontEnd/computer-vision/haarcascades/haarcascade_smile.xml')
 
 # load our serialized model from disk
 print("[INFO] loading model...")
@@ -55,30 +58,29 @@ while True:
 	#print(frame);
 	(h, w) = frame.shape[:2]
 	#print(h,w);
-	blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
-		0.007843, (300, 300), 127.5)
+	#blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),0.007843, (300, 300), 127.5)
 
 	# pass the blob through the network and obtain the detections and
 	# predictions
-	net.setInput(blob)
-	detections = net.forward()
+	#net.setInput(blob)
+	#detections = net.forward()
 
 	# loop over the detections
-	for i in np.arange(0, detections.shape[2]):
+	#for i in np.arange(0, detections.shape[2]):
 		# extract the confidence (i.e., probability) associated with
 		# the prediction
-		confidence = detections[0, 0, i, 2]
+		#confidence = detections[0, 0, i, 2]
 
 		# filter out weak detections by ensuring the `confidence` is
 		# greater than the minimum confidence
-		if confidence > .2:
+		#if confidence > .2:
 			# extract the index of the class label from the
 			# `detections`, then compute the (x, y)-coordinates of
 			# the bounding box for the object
-			idx = int(detections[0, 0, i, 1])
-			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+			#idx = int(detections[0, 0, i, 1])
+			#box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 			#print(box)
-			(startX, startY, endX, endY) = box.astype("int")
+			#(startX, startY, endX, endY) = box.astype("int")
 
 			# draw the prediction on the frame
 			#label = "{}: {:.2f}%".format(CLASSES[idx],
@@ -88,19 +90,26 @@ while True:
 			#y = startY - 15 if startY - 15 > 15 else startY + 15
 			#cv2.putText(frame, label, (5, 10),
 			#	cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
-			if CLASSES[idx] == "person":
-				gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-				faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-				if len(faces) != 0:
-					for(x,y,w,h) in faces:
-						roi_gray = gray[y:y+h, x:x+w]
-						eyes = eye_cascade.detectMultiScale(roi_gray)
-						if len(eyes) != 0:
+			#if CLASSES[idx] == "person":
+	gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+	faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+	if len(faces) > 0:
+		for (x,y,w,h) in faces:
+			roi_gray = gray[y:y+h, x:x+w]
+			eyes = eye_cascade.detectMultiScale(roi_gray)
+			if len(eyes) > 0:
+				for(x,y,w,h) in eyes:
+					okay = okay_cascade.detectMultiScale(gray, 1.3, 5)
+					vicky = vicky_cascade.detectMultiScale(gray, 1.3, 5)
+					if len(vicky) > 0:
+						for (x, y, w, h) in vicky:
+							if x+w < 20 or y+h < 20:
+								continue
+							cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 							print("1")
-							
+							#elif (len(vicky) > 0):
+							#	print("2")					
 				
-			
-
 	# show the output frame
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
