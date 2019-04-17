@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kinect Spotify Player</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const api = axios.create({
+        baseURL: 'http://localhost:8081/spotify/'
+      });
+      var token;
+      var tokenSet = false;
+      var id;
+      var player;
+      var socket = io('http://localhost:8081');
+      socket.on('connect', () => {
+        console.log('Connected to server');
+      });
+      socket.on('token', (data) => {
+        if(tokenSet) {
+          console.log('token already set, not making a new player');
+          return;
+        } else {
+          console.log('received token, making a new player');
+          tokenSet = true;
+          token = data.token;
+
+          this.player = new Spotify.Player({
+            name: 'SmartDJ',
+            getOAuthToken: cb => {
+              api.get('access_token/primary').then((response) => {
+                token = response.data.access_token;
+              });
+              cb(token.access_token);
+            }
+          });
+
+          // Error handling
+          this.player.addListener('initialization_error', ({
+            message
+          }) => {
+            console.error(message);
+          });
+          this.player.addListener('authentication_error', ({
+            message
+          }) => {
+            console.error(message);
+          });
+          this.player.addListener('account_error', ({
+            message
+          }) => {
+            console.error(message);
+          });
+          this.player.addListener('playback_error', ({
+            message
+          }) => {
+            console.error(message);
+          });
+
+          // Playback status updates
+          this.player.addListener('player_state_changed', state => {
+            console.log(state);
+            socket.emit('stateChanged', {state});
+          });
+
+          // Ready
+          this.player.addListener('ready', ({
+            device_id
+          }) => {
+            console.log('Ready with Device ID', device_id);
+            socket.emit('staticPlayerReady', {id: device_id});
+          });
+
+          // Not Ready
+          this.player.addListener('not_ready', ({
+            device_id
+          }) => {
+            console.log('Device ID has gone offline', device_id);
+          });
+
+          // Connect to the player!
+          this.player.connect().then(success => {
+            if (success) {
+              console.log('Webplayback SDK successfully connected to Spotify');
+            }
+          });
+        }
+        });
+      }
+  </script>
+  <style>
+    body,
+    h1 {
+      font-family: "Raleway", sans-serif
+    }
+
+    body,
+    html {
+      height: 100%
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Spotify Player</h1>
+  <h2>Start playback from anywhere else</h2>
+</body>
+
+</html>

@@ -11,6 +11,7 @@
 import SpotifyService from '@/services/SpotifyService';
 import Particle from '@/util/Particle.js';
 import Controls from '@/components/Controls';
+const MODEL_URLS = '../assets/models';
 
 
 export default {
@@ -32,11 +33,12 @@ export default {
 			prevEnergy: [],
 			requestid: null,
 			canvas: HTMLElement,
+			MODEL_URLS: '/models'
 		}
 	},
 	sockets: {
 		playerReady: function(data) {
-			this.token = data.token;
+			this.token = data.token.access_token;
 			this.playerId = data.player_id;
 			if(this.transferred === false) {
 				this.transfer();
@@ -98,6 +100,11 @@ export default {
 		this.sizeCanvas();
 	},
 	methods: {
+		async faceAPI() {
+			await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
+			await faceapi.loadFaceLandmarkModel(MODEL_URL);
+			await faceapi.loadFaceRecognitionModel(MODEL_URL);
+		},
 		sizeCanvas() {
 			this.ratio = window.devicePixelRatio;
 			this.height = window.innerHeight;
@@ -111,7 +118,7 @@ export default {
 			}
 		},
 		async transfer() {
-			const response = await SpotifyService.transferDevicePlayer({player_id: localStorage.device_id, access_token: localStorage.access_token, play: true});
+			const response = await SpotifyService.transferDevicePlayer({id: localStorage.device_id, access_token: localStorage.access_token, play: true});
 			if(response.data.success === true) {
 				this.setup();
 				this.transferred = true;

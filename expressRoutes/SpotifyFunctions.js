@@ -282,9 +282,10 @@ function getDevices(token, res) {
 }
 exports.getDevices = getDevices;
 
-function transferPlayback(id, token, play = true, res) {
+function transferPlayback(id, token, play = true, res = null) {
 	if (token === undefined || token === '' || id === undefined || id === '') {
 		//console.log('cant transfer to player, no access token or id')
+		if(res !== null)
 		return res.send({
 			success: false
 		});
@@ -305,11 +306,13 @@ function transferPlayback(id, token, play = true, res) {
 	request.put(options, (error, response, body) => {
 		if (!error && response.statusCode === 204) {
 			//console.log('playback started on webplayer');
+			if (res !== null)
 			return res.send({
 				success: true
 			});
 		} else {
 			//console.log(body);
+			if (res !== null)
 			return res.send({
 				success: false
 			});

@@ -1,10 +1,10 @@
 import Api from '@/services/PythonApi';
 
 export default {
-	start() {
-		return Api().post('start');
+	startVid() {
+		return Api().post('startVideo');
 	},
-	end() {
-		return Api().post('end');
+	endVid() {
+		return Api().post('endVideo');
 	}
 }

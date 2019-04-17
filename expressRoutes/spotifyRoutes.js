@@ -26,10 +26,20 @@ module.exports = function (app, io) {
 
 	io.on('connection', function (socket) {
 		//console.log('client connected');
+		var token = {
+			access_token: app.settings.primary_access_token,
+			refresh_token: app.settings.primary_refresh_token
+		};
+		socket.emit('token', {
+			token: token
+		});
 
-		socket.on('ready', (data) => {
-			//transferPlayback(data.id, data.access_token, data.play);
+		socket.on('visualPlayerReady', (data) => {
 			socket.emit('playerReady', data);
+		});
+
+		socket.on('staticPlayerReady', (data) => {
+			SpotifyFunctions.transferPlayback(data.id, token.access_token, false, null);
 		});
 
 		socket.on('stateChanged', (data) => {
@@ -150,7 +160,7 @@ module.exports = function (app, io) {
 	});
 
 	spotifyRoute.route('/transfer/player').put((req, res) => {
-		return SpotifyFunctions.transferPlayback(req.body.player_id, req.body.access_token, req.body.play, res)
+		return SpotifyFunctions.transferPlayback(req.body.id, req.body.access_token, req.body.play, res)
 	});
 
 	spotifyRoute.route('/transfer/:id').put((req, res) => {

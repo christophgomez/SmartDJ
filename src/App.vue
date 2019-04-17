@@ -60,7 +60,7 @@ export default {
           if(!response) {
             this.$router.replace({name: 'home'});
           } else if(response.version) {
-            this.$router.replace({name: 'visualizer'});
+            this.$router.replace({name: 'visualizer'});            
           }
         });
       } else {
@@ -69,9 +69,6 @@ export default {
     }
   },
   mounted() {
-  },
-  beforeDestroy() {
-    this.killPython();
   },
   sockets: {
     paused: function() {
@@ -92,14 +89,15 @@ export default {
   watch: {
     $route(to, from) {
       if(to.path === '/') {
+        this.killPythonVideo();
         this.terminateVis();
       } else if(to.path === '/success') {
         return;
       } else if(to.path === '/visualizer') {
+        this.killPythonVideo();
         this.initVis();
-        this.startPython();
         window.onbeforeunload = () => {
-          this.killPython();
+          this.startPythonVideo();
         }
       } else {
         return;
@@ -154,11 +152,11 @@ export default {
       }
       window.postMessage(data, "*");*/
     },
-    async startPython() {
-      await PythonService.start();
+    async startPythonVideo() {
+      await PythonService.startVid();
     },
-    async killPython() {
-      await PythonService.end();
+    async killPythonVideo() {
+      await PythonService.endVid();
     },
     async webPlayer() {
       if(this.player === null) {
@@ -210,7 +208,7 @@ export default {
           localStorage.setItem('device_id', device_id);
           this.songLoaded = true;
           this.playerId = device_id;
-					this.$socket.emit('ready', {player_id: this.playerId, token: this.token});
+					this.$socket.emit('visualPlayerReady', {id: this.playerId, token: this.token});
 			 	});
 
 			 	// Not Ready

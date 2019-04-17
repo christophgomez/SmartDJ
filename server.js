@@ -10,6 +10,10 @@ var config;
 if (process.env.NODE_ENV !== 'production') {
 	config = require('./config/settings');
 }
+const Python = require("./expressRoutes/PythonFunctions").Python;
+const SpotifyFunctions = require('./expressRoutes/SpotifyFunctions');
+var detection = null;
+var voice = null;
 
 //var history = require('connect-history-api-fallback');
 
@@ -18,13 +22,17 @@ const app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 app.use(morgan('combined'));
-app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.json({
+	limit: '100mb'
+}));
 app.use(bodyParser.urlencoded({
 	parameterLimit: 100000,
 	limit: '100mb',
 	extended: true,
 }));
 app.use(cors());
+
+var run = false;
 
 // Set up MongoDB
 const mongoose = require('mongoose');
@@ -47,6 +55,23 @@ db.once('open', function (callback) {
 					console.log('Primary Token Configured');
 					TokenFunctions.refreshPrimaryToken(token);
 					TokenFunctions.setPrimaryToken(token);
+					run = true;
+					var detectionConstructor = {
+						scriptPath: 'computer-vision/detection.py',
+						args: ['computer-vision/proto.prototxt.txt', 'computer-vision/cafe.caffemodel']
+					};
+					var voiceConstructor = {
+						scriptPath: 'computer-vision/voice.py',
+						args: []
+					}
+					var detection;
+					var voice;
+					if (run === true) {
+						console.log("starting video detection script");
+						const pythonRoutes = require('./expressRoutes/pythonRoutes.js')(app, detection, voice, voiceConstructor, detectionConstructor);
+						app.use('/python', pythonRoutes);
+						console.log("set up python routes")
+					}
 				}
 			});
 		} else if (count > 1) {
@@ -56,15 +81,17 @@ db.once('open', function (callback) {
 		}
 	});
 
+	// app.set('scriptRef', detection);
+
+	console.log("Setting up routes")
 	// Set up the API routes
 	const spotifyRoutes = require('./expressRoutes/spotifyRoutes.js')(app, io);
 	app.use('/spotify', spotifyRoutes);
+	console.log("set up spotify routes")
 
 	const userRoutes = require('./expressRoutes/userRoutes.js');
 	app.use('/users', userRoutes);
-
-	const pythonRoutes = require('./expressRoutes/pythonRoutes.js');
-	app.use('/python', pythonRoutes);
+	console.log("set up user routes")
 
 	// Set up the server to serve the built frontend
 	app.use("/", serveStatic(path.join(__dirname, '/dist')));
@@ -82,4 +109,5 @@ db.once('open', function (callback) {
 	server.listen(port, () => {
 		console.log('Server listening on port ' + baseURL + port);
 	});
+
 });

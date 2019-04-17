@@ -5,7 +5,6 @@ let {
 
 class Python {
 	constructor(scriptPath, args) {
-		this.pyScript = null;
 		this.scriptPath = scriptPath;
 		this.args = args;
 	}
@@ -23,17 +22,8 @@ class Python {
 
 	}
 	killScript() {
-		this.pyScript.
-		this.pyScript.end(function (err, code, signal) {
-			if (err) {
-				throw err;
-			}
-			console.log('The exit code was: ' + code);
-			console.log('The exit signal was: ' + signal);
-			console.log('finished');
-			console.log('finished');
-		});
+		this.pyScript.terminate();
 	}
 }
 
-module.exports = Python;
+module.exports.Python = Python;
