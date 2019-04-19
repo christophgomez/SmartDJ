@@ -5,8 +5,30 @@ const Python = require("./PythonFunctions").Python;
 const pythonRoute = express.Router();
 var exec = require('child_process').exec;
 var detectionArgs = ['computer-vision/proto.prototxt.txt', 'computer-vision/cafe.caffemodel'];
+var base64img = require('base64-img');
+const fs = require('fs');
 
-module.exports = function (app, detection, voice, voiceConstructor, detectionConstructor) {
+module.exports = function (app, detection, voice, voiceConstructor, detectionConstructor, io) {
+	var image_path;
+	io.on('connection', (socket) => {
+		socket.on("image", (data) => {
+			// console.log('received image from server');
+			base64img.img(data.image, '', '1', function (err, filepath) {
+				image_path = filepath;
+				var gestureArgs = [image_path];
+				var cb = function (data) {
+					console.log(data);
+					if (data == 1) {
+						SpotifyFunctions.nextS(app.settings.primary_access_token);
+					}
+				}
+				var gesture = new Python('./computer-vision/gestureCheck.py', gestureArgs);
+				// console.log("starting script");
+				startVideo(gesture, cb);
+			});
+			
+		});
+	});
 	voice = new Python(voiceConstructor.scriptPath, voiceConstructor.args);
 	detection = new Python(detectionConstructor.scriptPath, detectionConstructor.args);
 	var token = app.settings.primary_access_token;
@@ -18,10 +40,10 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 	}
 	var callback2 = function (data) {
 		if (data == 1) {
-			console.log("User said play");
+			// console.log("User said play");
 			SpotifyFunctions.playS(token);
 		} else if (data == 2) {
-			console.log("User said pause");
+			// console.log("User said pause");
 			SpotifyFunctions.pauseS(token);
 		}
 	}

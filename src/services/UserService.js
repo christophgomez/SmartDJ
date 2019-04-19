@@ -19,4 +19,7 @@ export default {
 	updateToken(email, params) {
 		return Api().put(`/updateToken/${email}`, params);
 	},
+	getUserImage(email) {
+		return Api().get(`/image/${email}`);
+	}
 }

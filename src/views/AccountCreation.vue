@@ -30,7 +30,6 @@ export default {
 			stream: null,
 			canvas: null,
 			photo: null,
-			startButton: null,
 			num: 0,
 			imgArray: [],
 		}
@@ -44,7 +43,6 @@ export default {
 		this.video = document.getElementById('video');
 		this.canvas = document.getElementById('oCan');
 		this.photo = document.getElementById('photo');
-		this.startButton = document.getElementById('startButton');
 		navigator.mediaDevices.getUserMedia({video: true, audio: false}).then((stream) => {
 			this.stream = stream;
 			this.video.srcObject = stream;
@@ -79,10 +77,9 @@ export default {
      	 		this.canvas.width = this.width;
       		this.canvas.height = this.height;
      		 	ctx.drawImage(this.video, 0, 0, this.width, this.height);
-    
 				var data = this.canvas.toDataURL('image/png');
-				var base64 = data.replace("data:image/png;base64,","");
-				this.imgArray.push(base64);
+				//var base64 = data.replace("data:image/png;base64,","");
+				this.imgArray.push(data);
 				this.photo.setAttribute('src', data);
 				this.num++;
 				if(this.num === 5) {

@@ -182,4 +182,28 @@ userRoute.route('/delete/:id').delete((req, res) => {
 	});
 });
 
+userRoute.route('/image/:email').get((req, res) => {
+	User.findOne({
+		email: req.params.email
+	}, (error, user) => {
+		if (error) {
+			console.log(error);
+			console.log("\n");
+			return res.send({
+				success: false
+			});
+		}
+		if (user === null) {
+			return res.send({
+				success: false,
+			});
+		} else {
+			return res.send({
+				success: true,
+				image: user.images[0]
+			});
+		}
+	})
+})
+
 module.exports = userRoute;

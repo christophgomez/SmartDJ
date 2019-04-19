@@ -6,10 +6,12 @@ mic = sr.Microphone()
 try:
     print("Adjusting for background noise")
     with mic as source:
-        r.adjust_for_ambient_noise(source, duration=.1)
+        r.adjust_for_ambient_noise(source, duration=1)
     while True:
         print("Say a command")
         with mic as source:
+            r.energy_threshold = 2000
+            r.dynamic_energy_threshold = True
             audio = r.listen(source)
 
         print("Attempting to recognize")
@@ -20,7 +22,9 @@ try:
 
             # print number according to what was said
             # this is meant for the Spotify API to act accordingly
-            if "play" in command:
+            if "repeat playlist" in command:
+                print("7")
+            elif "play" in command:
                 print("1")
             elif "pause" in command:
                 print("2")
@@ -32,10 +36,8 @@ try:
                 print("5")
             elif "repeat song" in command:
                 print("6")
-            elif "repeat playlist" in command:
-                print("7")
             elif "stop listening" in command:
-                print("No Longer Listening. Press button to active microphone again")
+                print("No Longer Listening. Press button to active microphone again.")
                 exit()
 
         # if the audio cannot be recognized
@@ -48,4 +50,3 @@ try:
 
 except KeyboardInterrupt:
     print("The program has stopped due to keyboard interrupt")
-Collapse

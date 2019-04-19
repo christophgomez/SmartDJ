@@ -4,15 +4,19 @@
 		<b-modal ref="myModalRef" ok-only style='color:black;text-align:center' title='Whoops...'>
 			<p>Click the Spotilize extension button in the Chrome toolbar to start the visualizer!</p>
 		</b-modal>
+		<b-modal>
+			<canvas id="oCan"></canvas>
+		</b-modal>
+		<image id="imgSent" style='display:none'></image>
 	</div>
 </template>
 
 <script>
 import SpotifyService from '@/services/SpotifyService';
+import UserService from '@/services/UserService';
+import PythonService from '@/services/PythonService';
 import Particle from '@/util/Particle.js';
 import Controls from '@/components/Controls';
-const MODEL_URLS = '../assets/models';
-
 
 export default {
 	data() {
@@ -32,8 +36,17 @@ export default {
 			bands: null,
 			prevEnergy: [],
 			requestid: null,
-			canvas: HTMLElement,
-			MODEL_URLS: '/models'
+			visCanvas: HTMLElement,
+			MODEL_URLS: '/models',
+			dWidth: Number,
+			dHeight: Number,
+			streaming: Boolean,
+			video: null,
+			dStream: null,
+			dCanvas: null,
+			photoToSend: null,
+			refImage: HTMLImageElement,
+			faceMatcher: null
 		}
 	},
 	sockets: {
@@ -77,6 +90,10 @@ export default {
         }
       });
 		this.bands = null;
+		this.dWidth = 600;
+		this.dHeight = 0;
+		this.streaming = false;
+
 		window.addEventListener("message", (event) => {
 			// We only accept messages from ourselves
 			if (event.source != window)
@@ -92,28 +109,111 @@ export default {
 		this.particles = [];
 		this.bands = null;
 		this.ctx = null;
-		this.canvas = null;
+		this.visCanvas = null;
 		window.cancelAnimationFrame(this.requestid);
 	},
 	mounted() {
-		this.canvas = document.getElementById('canvas1');
+		this.visCanvas = document.getElementById('canvas1');
+		this.video = document.createElement('video');
+		this.dCanvas = document.getElementById('oCan');
+		this.loadFaceAPI();
+		navigator.mediaDevices.getUserMedia({video: true, audio: false}).then((stream) => {
+			this.dStream = stream;
+			this.video.srcObject = stream;
+			
+		}).catch((err) => {
+			console.log("An error occured: "+err);
+		});
+		this.video.addEventListener('canplay', (ev) => {
+			if(!this.streaming) {
+				this.dHeight = this.video.videoHeight / (this.video.videoWidth / this.dWidth);
+				this.video.setAttribute('width', this.dWidth);
+				this.video.setAttribute('height', this.dHeight);
+				this.dCanvas.setAttribute('width', this.dWidth);
+				this.dCanvas.setAttribute('height', this.dHeight);
+				this.streaming = true;
+				this.video.play();
+				this.onPlay(this.video);
+			}
+		}, false);
+		this.clearPhoto();
+		
+		
 		this.sizeCanvas();
 	},
 	methods: {
-		async faceAPI() {
-			await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
-			await faceapi.loadFaceLandmarkModel(MODEL_URL);
-			await faceapi.loadFaceRecognitionModel(MODEL_URL);
+		clearPhoto() {
+			var ctx = this.dCanvas.getContext('2d');
+			ctx.fillStyle = "#AAA";
+			ctx.fillRect(0,0, this.dCanvas.width, this.dCanvas.height);
+			var data = this.dCanvas.toDataURL('image/png');
+			
+		},
+		async loadFaceAPI() {
+			console.log('Email: '+localStorage.email);
+			const imgRes = await UserService.getUserImage(localStorage.email);
+			if(imgRes.data.success === true) {
+				this.refImage = new Image();
+				this.refImage.src = imgRes.data.image
+			}
+			await faceapi.loadTinyFaceDetectorModel(this.MODEL_URLS)
+			await faceapi.loadFaceLandmarkModel(this.MODEL_URLS);
+			await faceapi.loadFaceRecognitionModel(this.MODEL_URLS);
+			console.log("Detecting faces in ref image");
+			const results = await faceapi.detectAllFaces(this.refImage, new faceapi.TinyFaceDetectorOptions())
+  												  .withFaceLandmarks()
+  												  .withFaceDescriptors()
+			if (!results.length) {
+  				return
+			}
+
+			// create FaceMatcher with automatically assigned labels
+			// from the detection results for the reference image
+			this.faceMatcher = new faceapi.FaceMatcher(results)
+			console.log('face api loaded');
+		},
+		async onPlay(videoEl) {
+			const singleResult = await faceapi
+  										.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions())
+  										.withFaceLandmarks()
+  										.withFaceDescriptor()
+			if (singleResult) {
+  				const bestMatch = this.faceMatcher.findBestMatch(singleResult.descriptor)
+				  console.log("Recognize: "+bestMatch.toString())
+				  var person = bestMatch.toString();
+				  console.log("person includes unknown: "+person.includes("Unknown"));
+				  if(person.includes("Unknown") === false) {
+					  this.takePicture();
+				  }
+			}		
+
+			setTimeout(() => this.onPlay(videoEl), 1500);
+		},
+		takePicture() {
+			console.log("taking picture");
+			console.log(this.dWidth +" "+this.dHeight);
+			var ctx = this.dCanvas.getContext('2d');
+			if (this.dWidth && this.dHeight) {
+     	 		this.dCanvas.width = this.dWidth;
+      		this.dCanvas.height = this.dHeight;
+     		 	ctx.drawImage(this.video, 0, 0, this.dWidth, this.dHeight);
+				var data = this.dCanvas.toDataURL('image/png');
+				//var base64 = data.replace("data:image/png;base64,","");
+				console.log("sending picture");
+				this.$socket.emit('image', {image: data});
+    		} else {
+     		 	this.clearPhoto();
+			 }
 		},
 		sizeCanvas() {
 			this.ratio = window.devicePixelRatio;
 			this.height = window.innerHeight;
 			this.width = window.innerWidth;
 			//scale the canvas
-			if(this.canvas !== null && this.canvas !== undefined) {
-				this.canvas.setAttribute('height', this.height * this.ratio);
-				this.canvas.setAttribute('width', this.width * this.ratio);
-				this.ctx = this.canvas.getContext('2d');
+			if(this.visCanvas !== null && this.visCanvas !== undefined) {
+				this.visCanvas.setAttribute('height', this.height * this.ratio);
+				this.visCanvas.setAttribute('width', this.width * this.ratio);
+				this.ctx = this.visCanvas.getContext('2d');
 				this.ctx.globalCompositeOperation = 'lighter';
 			}
 		},

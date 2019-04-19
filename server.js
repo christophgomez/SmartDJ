@@ -68,7 +68,7 @@ db.once('open', function (callback) {
 					var voice;
 					if (run === true) {
 						console.log("starting video detection script");
-						const pythonRoutes = require('./expressRoutes/pythonRoutes.js')(app, detection, voice, voiceConstructor, detectionConstructor);
+						const pythonRoutes = require('./expressRoutes/pythonRoutes.js')(app, detection, voice, voiceConstructor, detectionConstructor, io);
 						app.use('/python', pythonRoutes);
 						console.log("set up python routes")
 					}

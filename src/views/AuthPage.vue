@@ -59,6 +59,7 @@ export default {
         // server returned an email
         if(eRes.data.success === true) {
           var email = eRes.data.email;
+          localStorage.setItem('email', email);
 
           // check if that email is in the database
           const pRes = await UserService.getUser(email);
@@ -67,8 +68,6 @@ export default {
           if(pRes.data.success === true) {
             this.user = true;
             this.$router.replace({name: 'visualizer'});
-
-            // start the python script
           }
           
           // Create a new user
