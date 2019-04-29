@@ -7,6 +7,7 @@ var exec = require('child_process').exec;
 var detectionArgs = ['computer-vision/proto.prototxt.txt', 'computer-vision/cafe.caffemodel'];
 var base64img = require('base64-img');
 const fs = require('fs');
+var isLinux = process.platform === "linux";
 
 module.exports = function (app, detection, voice, voiceConstructor, detectionConstructor, io) {
 	var image_path;
@@ -24,7 +25,7 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 				}
 				var gesture = new Python('./computer-vision/gestureCheck.py', gestureArgs);
 				// console.log("starting script");
-				startVideo(gesture, cb);
+				startScript(gesture, cb);
 			});
 			
 		});
@@ -47,9 +48,14 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 			SpotifyFunctions.pauseS(token);
 		}
 	}
-	startVideo(detection, callback1);
-	startVideo(voice, callback2);
-	var web_player = exec('open -a "Google Chrome" ./webPlayer.html');
+	startScript(detection, callback1);
+	startScript(voice, callback2);
+	var web_player;
+	if(isLinux)
+		web_player = exec('google-chrome ./webPlayer.html');
+	else
+		web_player = exec('open -a "Google Chrome" ./webPlayer.html');
+
 	pythonRoute.route('/startVideo').post((req, res) => {
 		detection = new Python("computer-vision/detection.py", detectionArgs);
 		token = app.settings.primary_access_token;
@@ -68,9 +74,12 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 				SpotifyFunctions.pauseS(token);
 			}
 		}
-		web_player = exec('open -a "Google Chrome" ./webPlayer.html');
-		startVideo(detection, callback1);
-		startVideo(voice, callback2)
+		if (isLinux)
+			web_player = exec('google-chrome ./webPlayer.html');
+		else
+			web_player = exec('open -a "Google Chrome" ./webPlayer.html');
+		startScript(detection, callback1);
+		startScript(voice, callback2)
 		res.send({
 			success: true
 		});
@@ -82,8 +91,8 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 			console.log("killing detection script");
 			web_player.kill();
 			web_player = null;
-			endVideo(detection);
-			endVideo(voice);
+			endScript(detection);
+			endScript(voice);
 			detection = null;
 		}
 		res.send({
@@ -91,11 +100,11 @@ module.exports = function (app, detection, voice, voiceConstructor, detectionCon
 		});
 	});
 
-	async function startVideo(detection, callback) {
+	async function startScript(detection, callback) {
 		await detection.startScript(callback);
 	}
 
-	async function endVideo(detection) {
+	async function endScript(detection) {
 		await detection.killScript();
 	}
 	return pythonRoute;

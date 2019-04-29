@@ -18,6 +18,12 @@ import PythonService from '@/services/PythonService';
 import Particle from '@/util/Particle.js';
 import Controls from '@/components/Controls';
 
+if (process.env.NODE_ENV !== 'production') {
+  var config = require('../../config/settings');
+}
+
+var chromeId = process.env.chromeId || config.chromeId;
+
 export default {
 	data() {
 		return {
@@ -82,7 +88,7 @@ export default {
 		}
 	},
 	created() {
-		chrome.runtime.sendMessage('lajigaapjnpmoooffpbdjehkkooeifjj', 'listening', (response) => {
+		chrome.runtime.sendMessage(chromeId, 'listening', (response) => {
         if(!response) {
           this.$router.replace({name: 'home'});
         } else if(response.listening === false) {
