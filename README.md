@@ -18,7 +18,7 @@ Linux -
 
 ```bash
 sudo apt-get update
-sudo apt-get update
+sudo apt-get install -y mongodb-org
 ```
 
 ### Install the Chrome extension:
