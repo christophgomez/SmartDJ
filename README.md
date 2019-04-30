@@ -14,7 +14,12 @@ npm install
 
 <b>Make sure MongoDB is installed,</b> if you don't have it installed you can find instructions here:<br>
 macOS - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/ <br>
-Windows - https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
+Linux - 
+
+```bash
+sudo apt-get update
+sudo apt-get update
+```
 
 ### Install the Chrome extension:
 
@@ -24,31 +29,7 @@ In Chrome, go to Extensions, click 'Load Unpacked Extension' navigate to the ext
 
 ### Some code changes required if you are using this for development 
 
-In `smartDJ/config/settings.js` change baseURL value to: `http://localhost:` <b>(NOTE: The colon)</b>
-
-<b>Ignore this for now</b>
-
-<b>If you're developing on Windows:</b>
-
-In `smart-dj-frontend-backend/expressRoutes/spotifyRoutes.js` change line:
-
-```js
-exec('open -a "Google Chrome" ./webPlayer.html', () => {
-  return res.status(200).send({
-    message: 'child process created'
-  });
-});
-```
-
-to
-
-```js
-exec('start chrome file:\\\C:\webplayer.html', () => {
-  return res.status(200).send({
-    message: 'child process created'
-  });
-});
-```
+In `smartDJ/config/settings.js` change baseURL value to: `http://localhost` <b>(NOTE: The colon)</b>
 
 ### Start the Database
 
@@ -58,10 +39,10 @@ On Mac in terminal execute:
 mongod
 ```
 
-On Windows in cmd execute:
+On Linux execute:
 
-```bash
-"C:\Program Files\MongoDB\Server\3.2\bin\mongod.exe"
+``bash
+sudo service mongos start
 ```
 
 ### Start the Backend
@@ -75,6 +56,10 @@ npm run server
 ```bash
 npm run serve
 ```
+
+### Run the App
+
+Go to localhost:8080
 
 
 ## API Routes
