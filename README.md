@@ -2,6 +2,8 @@
 
 Raspberry Pi Powered, Kinect Controlled Music Streaming with AI
 
+For the Python/OpenCV version, check out the "v2" branch
+
 ## Initial Project setup
 
 ### Server Setup:
